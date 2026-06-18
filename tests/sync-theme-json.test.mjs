@@ -19,18 +19,18 @@ const css = `
 	--emilias-color-accent-3: #503AA8;
 	--emilias-color-accent-4: #686868;
 	--emilias-color-accent-5: #FBFAF3;
-	--emilias-space-20: 10px;
-	--emilias-space-30: 20px;
-	--emilias-space-40: 30px;
-	--emilias-space-50: clamp(1rem, 2vw, 2rem);
-	--emilias-space-60: clamp(2rem, 3vw, 3rem);
-	--emilias-space-70: clamp(3rem, 4vw, 4rem);
-	--emilias-space-80: clamp(4rem, 5vw, 5rem);
-	--emilias-font-size-small: 0.875rem;
-	--emilias-font-size-medium: clamp(1rem, 1vw, 1.125rem);
-	--emilias-font-size-large: clamp(1.125rem, 2vw, 1.375rem);
-	--emilias-font-size-x-large: clamp(1.75rem, 3vw, 2rem);
-	--emilias-font-size-xx-large: clamp(2.15rem, 4vw, 3rem);
+	--emilias-space-20: clamp(0.5rem, 0.41rem + 0.45vw, 0.75rem);
+	--emilias-space-30: clamp(0.75rem, 0.61rem + 0.68vw, 1.125rem);
+	--emilias-space-40: clamp(1rem, 0.82rem + 0.91vw, 1.5rem);
+	--emilias-space-50: clamp(1.5rem, 1.23rem + 1.36vw, 2.25rem);
+	--emilias-space-60: clamp(2.25rem, 1.84rem + 2.05vw, 3.375rem);
+	--emilias-space-70: clamp(3.375rem, 2.76rem + 3.07vw, 5.0625rem);
+	--emilias-space-80: clamp(5.0625rem, 4.14rem + 4.60vw, 7.5938rem);
+	--emilias-font-size--1: clamp(0.8333rem, 0.83rem + 0.02vw, 0.844rem);
+	--emilias-font-size-0: clamp(1rem, 0.95rem + 0.23vw, 1.125rem);
+	--emilias-font-size-1: clamp(1.2rem, 1.09rem + 0.54vw, 1.4996rem);
+	--emilias-font-size-2: clamp(1.44rem, 1.24rem + 1.02vw, 1.999rem);
+	--emilias-font-size-3: clamp(1.728rem, 1.39rem + 1.70vw, 2.6647rem);
 }
 `;
 
@@ -94,8 +94,30 @@ test("maps Sugarcube variables to WordPress presets", () => {
 		theme.settings.color.palette.at(-1).color,
 		"color-mix(in srgb, currentColor 20%, transparent)",
 	);
-	assert.equal(theme.settings.spacing.spacingSizes[3].size, "clamp(1rem, 2vw, 2rem)");
-	assert.equal(theme.settings.typography.fontSizes[1].size, "clamp(1rem, 1vw, 1.125rem)");
+	assert.deepEqual(
+		theme.settings.spacing.spacingSizes.map(({ slug }) => slug),
+		["20", "30", "40", "50", "60", "70", "80"],
+	);
+	assert.deepEqual(
+		theme.settings.typography.fontSizes.map(({ slug }) => slug),
+		["small", "medium", "large", "x-large", "xx-large"],
+	);
+	assert.equal(
+		theme.settings.spacing.spacingSizes[0].size,
+		"clamp(0.5rem, 0.41rem + 0.45vw, 0.75rem)",
+	);
+	assert.equal(
+		theme.settings.spacing.spacingSizes[6].size,
+		"clamp(5.0625rem, 4.14rem + 4.60vw, 7.5938rem)",
+	);
+	assert.equal(
+		theme.settings.typography.fontSizes[0].size,
+		"clamp(0.8333rem, 0.83rem + 0.02vw, 0.844rem)",
+	);
+	assert.equal(
+		theme.settings.typography.fontSizes[4].size,
+		"clamp(1.728rem, 1.39rem + 1.70vw, 2.6647rem)",
+	);
 	assert.equal(theme.settings.typography.fluid, false);
 	assert.ok(theme.settings.typography.fontSizes.every(({ fluid }) => fluid === false));
 	assert.deepEqual(theme.settings.typography.fontFamilies, [{ name: "Keep me" }]);

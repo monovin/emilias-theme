@@ -60,37 +60,52 @@ from the generated `theme.json` values.
 Sugarcube calculates fluid spacing and type over a viewport range of 320px to
 1200px, configured in `sugarcube.config.js`.
 
-## Fluid values
+## Scale recipes
 
-Fluid spacing and font-size tokens use Sugarcube's `sh.sugarcube.fluid`
-extension. The token keeps a static fallback in `$value` and defines its fluid
-endpoints separately:
+Spacing and font sizes use Sugarcube's `sh.sugarcube.scale` extension. The
+recipes generate every concrete dimension token and its fluid `clamp()` value.
+
+Spacing uses a named multiplier scale:
 
 ```json
 {
-	"$value": {
-		"value": 1,
-		"unit": "rem"
+	"mode": "multipliers",
+	"base": {
+		"min": { "value": 1, "unit": "rem" },
+		"max": { "value": 1.5, "unit": "rem" }
 	},
-	"$extensions": {
-		"sh.sugarcube": {
-			"fluid": {
-				"min": {
-					"value": 1,
-					"unit": "rem"
-				},
-				"max": {
-					"value": 1.125,
-					"unit": "rem"
-				}
-			}
-		}
+	"multipliers": {
+		"20": 0.5,
+		"30": 0.75,
+		"40": 1,
+		"50": 1.5,
+		"60": 2.25,
+		"70": 3.375,
+		"80": 5.0625
 	}
 }
 ```
 
-The generated `clamp()` value is written directly to `theme.json`. WordPress's
-own fluid calculation is disabled so it does not alter Sugarcube's curve.
+Typography uses an exponential scale with a `1rem` to `1.125rem` base, minimum
+and maximum ratios of `1.2` and `1.333`, one negative step, and three positive
+steps.
+
+Spacing preserves its WordPress slugs directly: Sugarcube steps `20` through
+`80` map to WordPress spacing presets `20` through `80`.
+
+Typography maps Sugarcube's numeric steps to semantic WordPress presets:
+
+| WordPress preset | Sugarcube type step |
+| --- | --- |
+| `small` | `-1` |
+| `medium` | `0` |
+| `large` | `1` |
+| `x-large` | `2` |
+| `xx-large` | `3` |
+
+The generated `clamp()` values are written directly to `theme.json`.
+WordPress's own fluid calculation is disabled so it does not alter Sugarcube's
+curves.
 
 ## The `accent-6` exception
 
@@ -129,9 +144,9 @@ npm run build
 The synchronization script deliberately enforces the existing WordPress preset
 contract. Adding a token alone will fail as an unexpected Sugarcube variable.
 
-To change the preset set:
+To change the preset set or scale:
 
-1. Add or remove the token in `tokens/`.
+1. Change the recipe base, ratios, multipliers, or step counts in `tokens/`.
 2. Update the corresponding preset mapping in
    `scripts/sync-theme-json.mjs`.
 3. Preserve existing slugs whenever saved WordPress content may reference them.

@@ -1,100 +1,28 @@
 {
 	"space": {
 		"$type": "dimension",
-		"20": {
-			"$value": {
-				"value": 10,
-				"unit": "px"
-			}
-		},
-		"30": {
-			"$value": {
-				"value": 20,
-				"unit": "px"
-			}
-		},
-		"40": {
-			"$value": {
-				"value": 30,
-				"unit": "px"
-			}
-		},
-		"50": {
-			"$value": {
-				"value": 30,
-				"unit": "px"
-			},
-			"$extensions": {
-				"sh.sugarcube": {
-					"fluid": {
+		"$extensions": {
+			"sh.sugarcube": {
+				"scale": {
+					"mode": "multipliers",
+					"base": {
 						"min": {
-							"value": 30,
-							"unit": "px"
+							"value": 1,
+							"unit": "rem"
 						},
 						"max": {
-							"value": 50,
-							"unit": "px"
+							"value": 1.5,
+							"unit": "rem"
 						}
-					}
-				}
-			}
-		},
-		"60": {
-			"$value": {
-				"value": 30,
-				"unit": "px"
-			},
-			"$extensions": {
-				"sh.sugarcube": {
-					"fluid": {
-						"min": {
-							"value": 30,
-							"unit": "px"
-						},
-						"max": {
-							"value": 70,
-							"unit": "px"
-						}
-					}
-				}
-			}
-		},
-		"70": {
-			"$value": {
-				"value": 50,
-				"unit": "px"
-			},
-			"$extensions": {
-				"sh.sugarcube": {
-					"fluid": {
-						"min": {
-							"value": 50,
-							"unit": "px"
-						},
-						"max": {
-							"value": 90,
-							"unit": "px"
-						}
-					}
-				}
-			}
-		},
-		"80": {
-			"$value": {
-				"value": 70,
-				"unit": "px"
-			},
-			"$extensions": {
-				"sh.sugarcube": {
-					"fluid": {
-						"min": {
-							"value": 70,
-							"unit": "px"
-						},
-						"max": {
-							"value": 140,
-							"unit": "px"
-						}
+					},
+					"multipliers": {
+						"20": 0.5,
+						"30": 0.75,
+						"40": 1,
+						"50": 1.5,
+						"60": 2.25,
+						"70": 3.375,
+						"80": 5.0625
 					}
 				}
 			}

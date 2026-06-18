@@ -33,11 +33,11 @@ const SPACING_PRESETS = [
 ];
 
 const FONT_SIZE_PRESETS = [
-	{ name: "Small", slug: "small", variable: "--emilias-font-size-small" },
-	{ name: "Medium", slug: "medium", variable: "--emilias-font-size-medium" },
-	{ name: "Large", slug: "large", variable: "--emilias-font-size-large" },
-	{ name: "Extra Large", slug: "x-large", variable: "--emilias-font-size-x-large" },
-	{ name: "Extra Extra Large", slug: "xx-large", variable: "--emilias-font-size-xx-large" },
+	{ name: "Small", slug: "small", variable: "--emilias-font-size--1" },
+	{ name: "Medium", slug: "medium", variable: "--emilias-font-size-0" },
+	{ name: "Large", slug: "large", variable: "--emilias-font-size-1" },
+	{ name: "Extra Large", slug: "x-large", variable: "--emilias-font-size-2" },
+	{ name: "Extra Extra Large", slug: "xx-large", variable: "--emilias-font-size-3" },
 ];
 
 const EXPECTED_VARIABLES = new Set(
