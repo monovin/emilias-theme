@@ -1,0 +1,26 @@
+{
+	"color": {
+		"$type": "color",
+		"base": {
+			"$value": "#FFFFFF"
+		},
+		"contrast": {
+			"$value": "#111111"
+		},
+		"accent-1": {
+			"$value": "#FFEE58"
+		},
+		"accent-2": {
+			"$value": "#F6CFF4"
+		},
+		"accent-3": {
+			"$value": "#503AA8"
+		},
+		"accent-4": {
+			"$value": "#686868"
+		},
+		"accent-5": {
+			"$value": "#FBFAF3"
+		}
+	}
+}

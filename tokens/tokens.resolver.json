@@ -1,0 +1,21 @@
+{
+	"version": "2025.10",
+	"name": "Emilias default theme",
+	"resolutionOrder": [
+		{
+			"type": "set",
+			"name": "default",
+			"sources": [
+				{
+					"$ref": "./colors.json"
+				},
+				{
+					"$ref": "./spacing.json"
+				},
+				{
+					"$ref": "./typography.json"
+				}
+			]
+		}
+	]
+}

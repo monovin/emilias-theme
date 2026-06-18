@@ -13,20 +13,33 @@
 	},
 	"homepage": "https://wordpress.org/themes/twentytwentyfive/",
 	"engines": {
-		"node": ">=20.10.0",
+		"node": ">=20.19.0",
 		"npm": ">=10.2.3"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "2.5.0",
+		"@sugarcube-sh/cli": "0.1.16",
 		"@wordpress/browserslist-config": "^6.34.0",
+		"cssnano": "^7.1.2",
 		"postcss": "^8.5.6",
-		"postcss-cli": "^11.0.1",
-		"cssnano": "^7.1.2"
+		"postcss-cli": "^11.0.1"
 	},
 	"browserslist": [
 		"extends @wordpress/browserslist-config"
 	],
-  "scripts": {
-    "build": "postcss style.css --use cssnano -o style.min.css --no-map",
-    "watch": "postcss style.css --use cssnano -o style.min.css --no-map --watch"
-  }
+	"scripts": {
+		"build": "npm run tokens:generate && npm run build:css",
+		"build:css": "postcss style.css --use cssnano -o style.min.css --no-map",
+		"check": "biome lint .",
+		"check:write": "biome check --write .",
+		"format": "biome format --write .",
+		"format:check": "biome format .",
+		"test": "node --test tests/*.test.mjs",
+		"tokens:check": "npm run tokens:validate && npm run tokens:css && node scripts/sync-theme-json.mjs --check",
+		"tokens:css": "sugarcube generate --variables-only --force --silent",
+		"tokens:generate": "npm run tokens:validate && npm run tokens:css && npm run tokens:sync",
+		"tokens:sync": "node scripts/sync-theme-json.mjs",
+		"tokens:validate": "sugarcube validate",
+		"watch": "postcss style.css --use cssnano -o style.min.css --no-map --watch"
+	}
 }

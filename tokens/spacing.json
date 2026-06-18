@@ -1,0 +1,103 @@
+{
+	"space": {
+		"$type": "dimension",
+		"20": {
+			"$value": {
+				"value": 10,
+				"unit": "px"
+			}
+		},
+		"30": {
+			"$value": {
+				"value": 20,
+				"unit": "px"
+			}
+		},
+		"40": {
+			"$value": {
+				"value": 30,
+				"unit": "px"
+			}
+		},
+		"50": {
+			"$value": {
+				"value": 30,
+				"unit": "px"
+			},
+			"$extensions": {
+				"sh.sugarcube": {
+					"fluid": {
+						"min": {
+							"value": 30,
+							"unit": "px"
+						},
+						"max": {
+							"value": 50,
+							"unit": "px"
+						}
+					}
+				}
+			}
+		},
+		"60": {
+			"$value": {
+				"value": 30,
+				"unit": "px"
+			},
+			"$extensions": {
+				"sh.sugarcube": {
+					"fluid": {
+						"min": {
+							"value": 30,
+							"unit": "px"
+						},
+						"max": {
+							"value": 70,
+							"unit": "px"
+						}
+					}
+				}
+			}
+		},
+		"70": {
+			"$value": {
+				"value": 50,
+				"unit": "px"
+			},
+			"$extensions": {
+				"sh.sugarcube": {
+					"fluid": {
+						"min": {
+							"value": 50,
+							"unit": "px"
+						},
+						"max": {
+							"value": 90,
+							"unit": "px"
+						}
+					}
+				}
+			}
+		},
+		"80": {
+			"$value": {
+				"value": 70,
+				"unit": "px"
+			},
+			"$extensions": {
+				"sh.sugarcube": {
+					"fluid": {
+						"min": {
+							"value": 70,
+							"unit": "px"
+						},
+						"max": {
+							"value": 140,
+							"unit": "px"
+						}
+					}
+				}
+			}
+		}
+	}
+}

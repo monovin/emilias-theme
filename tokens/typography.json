@@ -1,0 +1,93 @@
+{
+	"font": {
+		"size": {
+			"$type": "dimension",
+			"small": {
+				"$value": {
+					"value": 0.875,
+					"unit": "rem"
+				}
+			},
+			"medium": {
+				"$value": {
+					"value": 1,
+					"unit": "rem"
+				},
+				"$extensions": {
+					"sh.sugarcube": {
+						"fluid": {
+							"min": {
+								"value": 1,
+								"unit": "rem"
+							},
+							"max": {
+								"value": 1.125,
+								"unit": "rem"
+							}
+						}
+					}
+				}
+			},
+			"large": {
+				"$value": {
+					"value": 1.38,
+					"unit": "rem"
+				},
+				"$extensions": {
+					"sh.sugarcube": {
+						"fluid": {
+							"min": {
+								"value": 1.125,
+								"unit": "rem"
+							},
+							"max": {
+								"value": 1.375,
+								"unit": "rem"
+							}
+						}
+					}
+				}
+			},
+			"x-large": {
+				"$value": {
+					"value": 1.75,
+					"unit": "rem"
+				},
+				"$extensions": {
+					"sh.sugarcube": {
+						"fluid": {
+							"min": {
+								"value": 1.75,
+								"unit": "rem"
+							},
+							"max": {
+								"value": 2,
+								"unit": "rem"
+							}
+						}
+					}
+				}
+			},
+			"xx-large": {
+				"$value": {
+					"value": 2.15,
+					"unit": "rem"
+				},
+				"$extensions": {
+					"sh.sugarcube": {
+						"fluid": {
+							"min": {
+								"value": 2.15,
+								"unit": "rem"
+							},
+							"max": {
+								"value": 3,
+								"unit": "rem"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

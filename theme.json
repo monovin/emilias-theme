@@ -83,22 +83,22 @@
 				},
 				{
 					"name": "Regular",
-					"size": "clamp(30px, 5vw, 50px)",
+					"size": "clamp(1.875rem, 1.42rem + 2.27vw, 3.125rem)",
 					"slug": "50"
 				},
 				{
 					"name": "Large",
-					"size": "clamp(30px, 7vw, 70px)",
+					"size": "clamp(1.875rem, 0.97rem + 4.55vw, 4.375rem)",
 					"slug": "60"
 				},
 				{
 					"name": "X-Large",
-					"size": "clamp(50px, 7vw, 90px)",
+					"size": "clamp(3.125rem, 2.22rem + 4.55vw, 5.625rem)",
 					"slug": "70"
 				},
 				{
 					"name": "XX-Large",
-					"size": "clamp(70px, 10vw, 140px)",
+					"size": "clamp(4.375rem, 2.78rem + 7.95vw, 8.75rem)",
 					"slug": "80"
 				}
 			],
@@ -113,7 +113,7 @@
 		},
 		"typography": {
 			"defaultFontSizes": false,
-			"fluid": true,
+			"fluid": false,
 			"fontFamilies": [
 				{
 					"fontFace": [
@@ -336,39 +336,27 @@
 					"slug": "small"
 				},
 				{
-					"fluid": {
-						"max": "1.125rem",
-						"min": "1rem"
-					},
+					"fluid": false,
 					"name": "Medium",
-					"size": "1rem",
+					"size": "clamp(1rem, 0.95rem + 0.23vw, 1.125rem)",
 					"slug": "medium"
 				},
 				{
-					"fluid": {
-						"max": "1.375rem",
-						"min": "1.125rem"
-					},
+					"fluid": false,
 					"name": "Large",
-					"size": "1.38rem",
+					"size": "clamp(1.125rem, 1.03rem + 0.45vw, 1.375rem)",
 					"slug": "large"
 				},
 				{
-					"fluid": {
-						"max": "2rem",
-						"min": "1.75rem"
-					},
+					"fluid": false,
 					"name": "Extra Large",
-					"size": "1.75rem",
+					"size": "clamp(1.75rem, 1.66rem + 0.45vw, 2rem)",
 					"slug": "x-large"
 				},
 				{
-					"fluid": {
-						"max": "3rem",
-						"min": "2.15rem"
-					},
+					"fluid": false,
 					"name": "Extra Extra Large",
-					"size": "2.15rem",
+					"size": "clamp(2.15rem, 1.84rem + 1.55vw, 3rem)",
 					"slug": "xx-large"
 				}
 			],
