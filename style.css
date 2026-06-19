@@ -12,13 +12,7 @@ License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: emilias-theme
 Tags: one-column, custom-colors, custom-menu, custom-logo, editor-style, featured-images, full-site-editing, block-patterns, rtl-language-support, sticky-post, threaded-comments, translation-ready, wide-blocks, block-styles, style-variations, accessibility-ready, blog, portfolio, news
-
-/*
- * IMPORTANT: This file is only served on the frontend when `SCRIPT_DEBUG` is enabled;
- * in most instances, the `style.min.css` file will be served. It is not recommended that you
- * use the Theme File Editor to modify this stylesheet. Instead, add the necessary style
- * overrides via "Additional CSS" in the Site Editor.
- */
+*/
 
 /*
  * IMPORTANT: This file is only served on the frontend when `SCRIPT_DEBUG` is enabled;
@@ -31,20 +25,58 @@ Tags: one-column, custom-colors, custom-menu, custom-logo, editor-style, feature
  * Link styles
  * https://github.com/WordPress/gutenberg/issues/42319
  */
-a {
+:any-link {
 	text-decoration-thickness: 1px !important;
 	text-underline-offset: .1em;
 }
 
+/* Interactive states */
+.wp-element-button {
+	transition: filter 160ms ease, translate 160ms ease;
+}
+
+@media (hover: hover) {
+	:any-link:hover {
+		text-decoration-thickness: 2px !important;
+		text-underline-offset: .18em;
+	}
+
+	.wp-element-button:hover {
+		translate: 0 -1px;
+	}
+}
+
+:any-link:active {
+	opacity: .68;
+}
+
+.wp-element-button:active,
+[aria-pressed="true"] {
+	filter: brightness(.82);
+	translate: 0 1px;
+}
+
+.wp-block-navigation a[aria-current="page"] {
+	font-weight: 500;
+	text-decoration: underline;
+	text-decoration-thickness: 2px !important;
+	text-underline-offset: .18em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wp-element-button {
+		transition: none;
+	}
+}
+
 /* Focus styles */
-:where(.wp-site-blocks *:focus) {
-	outline-width: 2px;
-	outline-style: solid;
+:where(.wp-site-blocks :focus-visible) {
+	outline: 2px solid;
 }
 
 /* Increase the bottom margin on submenus, so that the outline is visible. */
 .wp-block-navigation .wp-block-navigation-submenu .wp-block-navigation-item:not(:last-child) {
-	margin-bottom: 3px;
+	margin-block-end: 3px;
 }
 
 /* Increase the outline offset on the parent menu items, so that the outline does not touch the text. */
