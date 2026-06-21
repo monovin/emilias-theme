@@ -21,6 +21,20 @@ if ( ! function_exists( 'emilias_theme_post_format_setup' ) ) :
 		add_theme_support( 'post-formats', array( 'aside', 'audio', 'chat', 'gallery', 'image', 'link', 'quote', 'status', 'video' ) );
 	}
 endif;
+
+if ( ! function_exists( 'emilias_theme_copyright_year' ) ) :
+	/**
+	 * Returns the current year for the copyright shortcode.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @return string Current year in the site's timezone.
+	 */
+	function emilias_theme_copyright_year() {
+		return esc_html( wp_date( 'Y' ) );
+	}
+endif;
+add_shortcode( 'copyright_year', 'emilias_theme_copyright_year' );
 add_action( 'after_setup_theme', 'emilias_theme_post_format_setup' );
 
 if ( ! function_exists( 'emilias_theme_editor_style' ) ) :
