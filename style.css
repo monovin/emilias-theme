@@ -1,8 +1,8 @@
 /*
 Theme Name: Emilias theme
-Theme URI: 
+Theme URI:
 Author: Fredrik Enges
-Author URI: 
+Author URI:
 Description: Started from twenty twenty five block theme
 Requires at least: 7.0
 Tested up to: 7.0
@@ -26,75 +26,84 @@ Tags: one-column, custom-colors, custom-menu, custom-logo, editor-style, feature
  * https://github.com/WordPress/gutenberg/issues/42319
  */
 :any-link {
-	text-decoration-thickness: 1px !important;
-	text-underline-offset: .1em;
+    text-decoration-thickness: 1px !important;
+    text-underline-offset: .1em;
 }
 
 /* Interactive states */
 .wp-element-button {
-	transition: filter 160ms ease, translate 160ms ease;
+    transition: filter 160ms ease, translate 160ms ease;
 }
 
 @media (hover: hover) {
-	:any-link:hover {
-		text-decoration-thickness: 2px !important;
-		text-underline-offset: .18em;
-	}
+    :any-link:hover {
+        text-decoration-thickness: 2px !important;
+        text-underline-offset: .18em;
+    }
 
-	.wp-element-button:hover {
-		translate: 0 -1px;
-	}
+    .wp-element-button:hover {
+        translate: 0 -1px;
+    }
 }
 
 :any-link:active {
-	opacity: .68;
+    opacity: .68;
 }
 
 .wp-element-button:active,
 [aria-pressed="true"] {
-	filter: brightness(.82);
-	translate: 0 1px;
+    filter: brightness(.82);
+    translate: 0 1px;
 }
 
 .wp-block-navigation a[aria-current="page"] {
-	font-weight: 500;
-	text-decoration: underline;
-	text-decoration-thickness: 2px !important;
-	text-underline-offset: .18em;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 2px !important;
+    text-underline-offset: .18em;
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.wp-element-button {
-		transition: none;
-	}
+    .wp-element-button {
+        transition: none;
+    }
 }
 
 /* Focus styles */
 :where(.wp-site-blocks :focus-visible) {
-	outline: 2px solid;
+    outline: 2px solid;
 }
 
 /* Increase the bottom margin on submenus, so that the outline is visible. */
 .wp-block-navigation .wp-block-navigation-submenu .wp-block-navigation-item:not(:last-child) {
-	margin-block-end: 3px;
+    margin-block-end: 3px;
 }
 
 /* Increase the outline offset on the parent menu items, so that the outline does not touch the text. */
 .wp-block-navigation .wp-block-navigation-item .wp-block-navigation-item__content {
-	outline-offset: 4px;
+    outline-offset: 4px;
 }
 
 /* Remove outline offset from the submenus, otherwise the outline is visible outside the submenu container. */
 .wp-block-navigation .wp-block-navigation-item ul.wp-block-navigation__submenu-container .wp-block-navigation-item__content {
-	outline-offset: 0;
+    outline-offset: 0;
 }
 
 /*
  * Progressive enhancement to reduce widows and orphans
  * https://github.com/WordPress/gutenberg/issues/55190
  */
-h1, h2, h3, h4, h5, h6, blockquote, caption, figcaption, p {
-	text-wrap: pretty;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+blockquote,
+caption,
+figcaption,
+p {
+    text-wrap: pretty;
 }
 
 /*
@@ -102,7 +111,7 @@ h1, h2, h3, h4, h5, h6, blockquote, caption, figcaption, p {
  * https://github.com/WordPress/gutenberg/issues/65934
 */
 .more-link {
-	display: block;
+    display: block;
 }
 
 /*
@@ -110,5 +119,29 @@ h1, h2, h3, h4, h5, h6, blockquote, caption, figcaption, p {
  * https://core.trac.wordpress.org/ticket/63875
  */
 :where(pre) {
-	overflow-x: auto;
+    overflow-x: auto;
+}
+
+/*
+Reference
+https://piccalil.li/blog/why-im-excited-about-text-box-trim-as-a-designer/
+https://developer.chrome.com/blog/css-text-box-trim */
+@supports (text-box: cap alphabetic) {
+    .text-box-trim {
+        text-box: cap alphabetic;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    @view-transition {
+        navigation: auto;
+    }
+
+    html {
+        interpolate-size: allow-keywords;
+    }
+
+    html:focus-within {
+        scroll-behavior: smooth;
+    }
 }
