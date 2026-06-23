@@ -1,18 +1,36 @@
-.wp-block-post-template.is-style-masonry {
+.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage) {
 	align-items: start;
 }
 
-.wp-block-post-template.is-style-masonry > li.wp-block-post {
+.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)
+	> li.wp-block-post {
 	box-sizing: border-box;
 	margin-block: 0;
 	min-width: 0;
 }
 
-.wp-block-post-template.is-style-masonry.is-js-masonry {
+.wp-block-post-template.is-style-masonry-collage > li.wp-block-post {
+	--masonry-column-span: 1;
+}
+
+.wp-block-post-template.is-style-masonry-collage > li.wp-block-post:first-child,
+.wp-block-post-template.is-style-masonry-collage
+	> li.wp-block-post:nth-child(8n + 6) {
+	--masonry-column-span: 2;
+}
+
+.wp-block-post-template:is(
+	.is-style-masonry,
+	.is-style-masonry-collage
+).is-js-masonry {
 	position: relative;
 }
 
-.wp-block-post-template.is-style-masonry.is-js-masonry > li.wp-block-post {
+.wp-block-post-template:is(
+		.is-style-masonry,
+		.is-style-masonry-collage
+	).is-js-masonry
+	> li.wp-block-post {
 	inset-block-start: 0;
 	inset-inline-start: 0;
 	position: absolute;

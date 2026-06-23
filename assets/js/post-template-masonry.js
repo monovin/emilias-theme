@@ -1,5 +1,6 @@
 (() => {
-	const gridSelector = ".wp-block-post-template.is-style-masonry";
+	const gridSelector =
+		".wp-block-post-template.is-style-masonry, .wp-block-post-template.is-style-masonry-collage";
 	const itemSelector = "li.wp-block-post";
 	let allFrame = null;
 	let nativeMasonrySupported = null;
@@ -62,31 +63,171 @@
 		}
 	}
 
+	function isCollageGrid(grid) {
+		return grid.classList.contains("is-style-masonry-collage");
+	}
+
+	function getLengthInPixels(length) {
+		const probe = document.createElement("div");
+
+		probe.style.cssText = `inline-size:${length};position:absolute;visibility:hidden;`;
+		document.body.append(probe);
+
+		const width = probe.getBoundingClientRect().width;
+
+		probe.remove();
+
+		return width;
+	}
+
+	function getConfiguredMinimumColumnWidth(grid) {
+		return window
+			.getComputedStyle(grid)
+			.getPropertyValue("--masonry-min-column-width")
+			.trim();
+	}
+
+	function getTemplateMinimumColumnWidth(template) {
+		const minTrackMatch = template.match(/minmax\(min\(([^,]+),\s*100%\)/);
+
+		return minTrackMatch ? minTrackMatch[1].trim() : "";
+	}
+
+	function getPixelColumns(template) {
+		return Array.from(template.matchAll(/(?:^|\s)([0-9.]+)px(?:\s|$)/g))
+			.map((match) => Number.parseFloat(match[1]))
+			.filter((track) => Number.isFinite(track) && track > 0);
+	}
+
+	function getEqualColumns(count, gridWidth, columnGap) {
+		const columnWidth = Math.max(
+			0,
+			(gridWidth - columnGap * (count - 1)) / count,
+		);
+
+		return Array.from({ length: count }, () => columnWidth);
+	}
+
+	function getExplicitRepeatCount(template) {
+		const repeatMatch = template.match(/^repeat\(\s*(\d+)\s*,/);
+
+		return repeatMatch ? Number.parseInt(repeatMatch[1], 10) : null;
+	}
+
+	function getColumnCountFromMinimumWidth(
+		minimumColumnWidth,
+		gridWidth,
+		columnGap,
+	) {
+		const width = getLengthInPixels(minimumColumnWidth);
+		const clampedMinimum = Math.min(
+			Number.isFinite(width) && width > 0 ? width : gridWidth,
+			gridWidth,
+		);
+
+		return Math.max(
+			1,
+			Math.floor((gridWidth + columnGap) / (clampedMinimum + columnGap)),
+		);
+	}
+
+	function getColumnCount(grid, template, gridWidth, columnGap) {
+		if (gridWidth <= 0) {
+			return 1;
+		}
+
+		const configuredMinimumColumnWidth = getConfiguredMinimumColumnWidth(grid);
+
+		if (configuredMinimumColumnWidth) {
+			return getColumnCountFromMinimumWidth(
+				configuredMinimumColumnWidth,
+				gridWidth,
+				columnGap,
+			);
+		}
+
+		const pixelColumns = getPixelColumns(template);
+		const pixelColumnsWidth =
+			pixelColumns.reduce((total, width) => total + width, 0) +
+			columnGap * Math.max(0, pixelColumns.length - 1);
+
+		if (
+			pixelColumns.length > 0 &&
+			pixelColumnsWidth <= gridWidth + 1 &&
+			pixelColumnsWidth >= gridWidth * 0.75
+		) {
+			return pixelColumns.length;
+		}
+
+		const repeatCount = getExplicitRepeatCount(template);
+
+		if (repeatCount) {
+			return repeatCount;
+		}
+
+		return getColumnCountFromMinimumWidth(
+			getTemplateMinimumColumnWidth(template) || "23rem",
+			gridWidth,
+			columnGap,
+		);
+	}
+
 	function getColumnMetrics(grid) {
 		const styles = window.getComputedStyle(grid);
 		const columnGap = Number.parseFloat(styles.columnGap) || 0;
 		const rowGap = Number.parseFloat(styles.rowGap) || 0;
-		const columns = styles.gridTemplateColumns
-			.split(" ")
-			.map((track) => Number.parseFloat(track))
-			.filter((track) => Number.isFinite(track) && track > 0);
-		const fallbackWidth = grid.getBoundingClientRect().width;
-
-		if (columns.length > 0) {
-			return {
-				columnGap,
-				columns,
-				isRtl: styles.direction === "rtl",
-				rowGap,
-			};
-		}
+		const gridWidth = grid.getBoundingClientRect().width;
+		const gridTemplateColumns =
+			styles.gridTemplateColumns === "none"
+				? grid.style.gridTemplateColumns
+				: styles.gridTemplateColumns;
+		const columnCount = getColumnCount(
+			grid,
+			gridTemplateColumns,
+			gridWidth,
+			columnGap,
+		);
 
 		return {
 			columnGap,
-			columns: [fallbackWidth],
+			columns: getEqualColumns(columnCount, gridWidth, columnGap),
+			gridWidth,
 			isRtl: styles.direction === "rtl",
 			rowGap,
 		};
+	}
+
+	function getItemSpan(item, columnCount, itemIndex) {
+		if (columnCount <= 2 && itemIndex > 0) {
+			return 1;
+		}
+
+		const span = Number.parseInt(
+			window.getComputedStyle(item).getPropertyValue("--masonry-column-span"),
+			10,
+		);
+
+		if (!Number.isFinite(span)) {
+			return 1;
+		}
+
+		return Math.max(1, Math.min(span, columnCount));
+	}
+
+	function getPlacement(columnHeights, span) {
+		let index = 0;
+		let height = Infinity;
+
+		for (let start = 0; start <= columnHeights.length - span; start++) {
+			const rangeHeight = Math.max(...columnHeights.slice(start, start + span));
+
+			if (rangeHeight < height) {
+				index = start;
+				height = rangeHeight;
+			}
+		}
+
+		return { height, index };
 	}
 
 	function layoutGrid(grid) {
@@ -96,27 +237,39 @@
 		}
 
 		const items = getItems(grid);
-		const { columnGap, columns, isRtl, rowGap } = getColumnMetrics(grid);
+		const { columnGap, columns, gridWidth, isRtl, rowGap } =
+			getColumnMetrics(grid);
 		const columnHeights = columns.map(() => 0);
-		const gridWidth = grid.getBoundingClientRect().width;
 
-		items.forEach((item) => {
-			const columnIndex = columnHeights.indexOf(Math.min(...columnHeights));
-			const columnWidth = columns[columnIndex] || gridWidth;
+		items.forEach((item, itemIndex) => {
+			const span = getItemSpan(item, columns.length, itemIndex);
+			const placement = getPlacement(columnHeights, span);
+			const columnIndex = placement.index;
+			const columnWidth = columns
+				.slice(columnIndex, columnIndex + span)
+				.reduce((total, width) => total + width, 0);
+			const itemWidth = Math.min(
+				columnWidth + columnGap * (span - 1),
+				gridWidth,
+			);
 			const inlineOffset = columns
 				.slice(0, columnIndex)
 				.reduce((total, width) => total + width + columnGap, 0);
+			const maxX = Math.max(0, gridWidth - itemWidth);
 			const x = isRtl
-				? Math.max(0, gridWidth - inlineOffset - columnWidth)
-				: inlineOffset;
-			const y = columnHeights[columnIndex];
+				? Math.min(Math.max(0, gridWidth - inlineOffset - itemWidth), maxX)
+				: Math.min(inlineOffset, maxX);
+			const y = placement.height;
 
-			item.style.setProperty("--masonry-column-width", `${columnWidth}px`);
+			item.style.setProperty("--masonry-column-width", `${itemWidth}px`);
 			item.style.setProperty("--masonry-x", `${x}px`);
 			item.style.setProperty("--masonry-y", `${y}px`);
 
-			columnHeights[columnIndex] +=
-				item.getBoundingClientRect().height + rowGap;
+			const itemBottom = y + item.getBoundingClientRect().height + rowGap;
+
+			for (let i = columnIndex; i < columnIndex + span; i++) {
+				columnHeights[i] = itemBottom;
+			}
 		});
 
 		grid.style.height = `${Math.max(0, Math.max(...columnHeights) - rowGap)}px`;
@@ -192,19 +345,34 @@
 	}
 
 	function initGrid(grid) {
+		const state = states.get(grid);
+		const shouldBeNative =
+			!shouldForceFallback() &&
+			!isCollageGrid(grid) &&
+			getNativeMasonrySupported();
+
+		if (state) {
+			if (state.native !== shouldBeNative) {
+				destroyGrid(grid);
+			} else {
+				observeItems(grid);
+				return;
+			}
+		}
+
 		if (states.has(grid)) {
 			observeItems(grid);
 			return;
 		}
 
-		if (!shouldForceFallback() && getNativeMasonrySupported()) {
+		if (shouldBeNative) {
 			grids.add(grid);
 			grid.classList.add("is-native-masonry");
 			states.set(grid, { frame: null, native: true });
 			return;
 		}
 
-		const state = {
+		const nextState = {
 			frame: null,
 			images: new WeakSet(),
 			items: new WeakSet(),
@@ -213,12 +381,12 @@
 		};
 
 		grids.add(grid);
-		states.set(grid, state);
+		states.set(grid, nextState);
 		grid.classList.add("is-js-masonry");
 
 		if ("ResizeObserver" in window) {
-			state.resizeObserver = new ResizeObserver(() => scheduleLayout(grid));
-			state.resizeObserver.observe(grid);
+			nextState.resizeObserver = new ResizeObserver(() => scheduleLayout(grid));
+			nextState.resizeObserver.observe(grid);
 		}
 
 		observeItems(grid);

@@ -129,6 +129,15 @@ if ( ! function_exists( 'emilias_theme_block_styles' ) ) :
 				'style_handle' => 'emilias-theme-post-template-masonry',
 			)
 		);
+
+		register_block_style(
+			'core/post-template',
+			array(
+				'name'         => 'masonry-collage',
+				'label'        => __( 'Collage Masonry', 'emilias-theme' ),
+				'style_handle' => 'emilias-theme-post-template-masonry',
+			)
+		);
 	}
 endif;
 add_action( 'init', 'emilias_theme_block_styles' );
@@ -147,6 +156,101 @@ if ( ! function_exists( 'emilias_theme_enqueue_post_template_masonry_assets' ) )
 	}
 endif;
 
+if ( ! function_exists( 'emilias_theme_is_masonry_post_template_class' ) ) :
+	/**
+	 * Checks whether a Post Template class list has a masonry style.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $class_name Block class name attribute.
+	 * @return bool Whether the block has a masonry style class.
+	 */
+	function emilias_theme_is_masonry_post_template_class( $class_name ) {
+		$styles = array( 'is-style-masonry', 'is-style-masonry-collage' );
+
+		foreach ( $styles as $style ) {
+			if ( false !== strpos( ' ' . $class_name . ' ', ' ' . $style . ' ' ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_sanitize_masonry_css_length' ) ) :
+	/**
+	 * Sanitizes a CSS length for the masonry column-width custom property.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed $value CSS length value.
+	 * @return string Sanitized CSS length, or an empty string when invalid.
+	 */
+	function emilias_theme_sanitize_masonry_css_length( $value ) {
+		if ( ! is_string( $value ) ) {
+			return '';
+		}
+
+		$value = trim( $value );
+
+		if ( '' === $value || preg_match( '/[;"\'{}<>]/', $value ) ) {
+			return '';
+		}
+
+		if ( 0 === strpos( $value, 'var:preset|spacing|' ) ) {
+			$slug = substr( $value, strlen( 'var:preset|spacing|' ) );
+
+			return 'var(--wp--preset--spacing--' . sanitize_title( $slug ) . ')';
+		}
+
+		if ( preg_match( '/^(?:0|(?:\d+|\d*\.\d+)(?:px|em|rem|vw|vh|vmin|vmax|ch|ex|%))$/i', $value ) ) {
+			return $value;
+		}
+
+		if ( preg_match( '/^(?:var|calc|clamp|min|max)\([a-z0-9\s+\-*\/.,()%:_-]+\)$/i', $value ) ) {
+			return $value;
+		}
+
+		return '';
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_add_masonry_minimum_column_width' ) ) :
+	/**
+	 * Adds the saved grid minimum column width as a masonry CSS variable.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $block_content       The rendered block content.
+	 * @param string $minimum_column_width The sanitized minimum column width.
+	 * @return string The updated block content.
+	 */
+	function emilias_theme_add_masonry_minimum_column_width( $block_content, $minimum_column_width ) {
+		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			return $block_content;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $block_content );
+
+		if ( ! $processor->next_tag( array( 'class_name' => 'wp-block-post-template' ) ) ) {
+			return $block_content;
+		}
+
+		$style = $processor->get_attribute( 'style' );
+		$style = is_string( $style ) ? trim( $style ) : '';
+
+		if ( '' !== $style && ';' !== substr( $style, -1 ) ) {
+			$style .= ';';
+		}
+
+		$style .= '--masonry-min-column-width:' . $minimum_column_width . ';';
+		$processor->set_attribute( 'style', $style );
+
+		return $processor->get_updated_html();
+	}
+endif;
+
 if ( ! function_exists( 'emilias_theme_enqueue_rendered_masonry_assets' ) ) :
 	/**
 	 * Enqueues masonry assets only when a masonry Post Template is rendered.
@@ -160,8 +264,18 @@ if ( ! function_exists( 'emilias_theme_enqueue_rendered_masonry_assets' ) ) :
 	function emilias_theme_enqueue_rendered_masonry_assets( $block_content, $block ) {
 		$class_name = isset( $block['attrs']['className'] ) ? $block['attrs']['className'] : '';
 
-		if ( false !== strpos( ' ' . $class_name . ' ', ' is-style-masonry ' ) ) {
-			emilias_theme_enqueue_post_template_masonry_assets();
+		if ( ! emilias_theme_is_masonry_post_template_class( $class_name ) ) {
+			return $block_content;
+		}
+
+		emilias_theme_enqueue_post_template_masonry_assets();
+
+		$minimum_column_width = isset( $block['attrs']['layout']['minimumColumnWidth'] )
+			? emilias_theme_sanitize_masonry_css_length( $block['attrs']['layout']['minimumColumnWidth'] )
+			: '';
+
+		if ( '' !== $minimum_column_width ) {
+			$block_content = emilias_theme_add_masonry_minimum_column_width( $block_content, $minimum_column_width );
 		}
 
 		return $block_content;

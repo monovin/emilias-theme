@@ -24,7 +24,7 @@
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:post-template {"align":"wide","className":"is-style-masonry","style":{"spacing":{"blockGap":"var:preset|spacing|50"}},"layout":{"type":"grid","columnCount":null,"minimumColumnWidth":"23rem"}} -->
+	<!-- wp:post-template {"className":"is-style-masonry-collage","style":{"spacing":{"blockGap":"var:preset|spacing|50"}},"layout":{"type":"grid","columnCount":null,"minimumColumnWidth":"23rem"}} -->
 		<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|30"}},"layout":{"type":"default"}} -->
 		<div class="wp-block-group">
 			<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->
