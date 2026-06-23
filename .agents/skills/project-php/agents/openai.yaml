@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project PHP"
+  short_description: "Use Local.app PHP for theme linting"
+  default_prompt: "Use $project-php to lint the WordPress theme PHP files."

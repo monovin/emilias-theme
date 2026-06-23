@@ -1,0 +1,27 @@
+.wp-block-post-template.is-style-masonry {
+	align-items: start;
+}
+
+.wp-block-post-template.is-style-masonry > li.wp-block-post {
+	box-sizing: border-box;
+	margin-block: 0;
+	min-width: 0;
+}
+
+.wp-block-post-template.is-style-masonry.is-js-masonry {
+	position: relative;
+}
+
+.wp-block-post-template.is-style-masonry.is-js-masonry > li.wp-block-post {
+	inset-block-start: 0;
+	inset-inline-start: 0;
+	position: absolute;
+	transform: translate3d(var(--masonry-x, 0), var(--masonry-y, 0), 0);
+	width: var(--masonry-column-width, 100%);
+}
+
+@supports (grid-template-rows: masonry) {
+	.wp-block-post-template.is-style-masonry {
+		grid-template-rows: masonry;
+	}
+}

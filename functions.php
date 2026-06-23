@@ -87,6 +87,24 @@ if ( ! function_exists( 'emilias_theme_block_styles' ) ) :
 	 * @return void
 	 */
 	function emilias_theme_block_styles() {
+		$masonry_style_path  = get_theme_file_path( 'assets/css/post-template-masonry.css' );
+		$masonry_script_path = get_theme_file_path( 'assets/js/post-template-masonry.js' );
+
+		wp_register_style(
+			'emilias-theme-post-template-masonry',
+			get_theme_file_uri( 'assets/css/post-template-masonry.css' ),
+			array(),
+			file_exists( $masonry_style_path ) ? filemtime( $masonry_style_path ) : wp_get_theme()->get( 'Version' )
+		);
+
+		wp_register_script(
+			'emilias-theme-post-template-masonry',
+			get_theme_file_uri( 'assets/js/post-template-masonry.js' ),
+			array(),
+			file_exists( $masonry_script_path ) ? filemtime( $masonry_script_path ) : wp_get_theme()->get( 'Version' ),
+			true
+		);
+
 		register_block_style(
 			'core/list',
 			array(
@@ -102,9 +120,68 @@ if ( ! function_exists( 'emilias_theme_block_styles' ) ) :
 				}',
 			)
 		);
+
+		register_block_style(
+			'core/post-template',
+			array(
+				'name'         => 'masonry',
+				'label'        => __( 'Masonry', 'emilias-theme' ),
+				'style_handle' => 'emilias-theme-post-template-masonry',
+			)
+		);
 	}
 endif;
 add_action( 'init', 'emilias_theme_block_styles' );
+
+if ( ! function_exists( 'emilias_theme_enqueue_post_template_masonry_assets' ) ) :
+	/**
+	 * Enqueues the Post Template masonry enhancement.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @return void
+	 */
+	function emilias_theme_enqueue_post_template_masonry_assets() {
+		wp_enqueue_style( 'emilias-theme-post-template-masonry' );
+		wp_enqueue_script( 'emilias-theme-post-template-masonry' );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_enqueue_rendered_masonry_assets' ) ) :
+	/**
+	 * Enqueues masonry assets only when a masonry Post Template is rendered.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $block_content The rendered block content.
+	 * @param array  $block         The parsed block.
+	 * @return string The rendered block content.
+	 */
+	function emilias_theme_enqueue_rendered_masonry_assets( $block_content, $block ) {
+		$class_name = isset( $block['attrs']['className'] ) ? $block['attrs']['className'] : '';
+
+		if ( false !== strpos( ' ' . $class_name . ' ', ' is-style-masonry ' ) ) {
+			emilias_theme_enqueue_post_template_masonry_assets();
+		}
+
+		return $block_content;
+	}
+endif;
+add_filter( 'render_block_core/post-template', 'emilias_theme_enqueue_rendered_masonry_assets', 10, 2 );
+
+if ( ! function_exists( 'emilias_theme_enqueue_masonry_editor_assets' ) ) :
+	/**
+	 * Enqueues the masonry enhancement in the block editor for live previews.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @return void
+	 */
+	function emilias_theme_enqueue_masonry_editor_assets() {
+		emilias_theme_enqueue_post_template_masonry_assets();
+	}
+endif;
+add_action( 'enqueue_block_editor_assets', 'emilias_theme_enqueue_masonry_editor_assets' );
 
 if ( ! function_exists( 'emilias_theme_pattern_categories' ) ) :
 	/**
