@@ -1,38 +1,26 @@
 {
-  "color": {
-    "$type": "color",
-    "royalblush-50": {
-      "$value": "#fbf3e9"
-    },
-    "royalblush-100": {
-      "$value": "#fbf1e7"
-    },
-    "royalblush-200": {
-      "$value": "#f8e9de"
-    },
-    "royalblush-300": {
-      "$value": "#f4d2c5"
-    },
-    "royalblush-400": {
-      "$value": "#f1aa98"
-    },
-    "royalblush-500": {
-      "$value": "#ef755d"
-    },
-    "royalblush-600": {
-      "$value": "#ef4c2b"
-    },
-    "royalblush-700": {
-      "$value": "#d14a22"
-    },
-    "royalblush-800": {
-      "$value": "#94401f"
-    },
-    "royalblush-900": {
-      "$value": "#4e2c1d"
-    },
-    "royalblush-950": {
-      "$value": "#231e1c"
-    }
-  }
+	"color": {
+		"$type": "color",
+		"base": {
+			"$value": "#FFFFFF"
+		},
+		"contrast": {
+			"$value": "#111111"
+		},
+		"accent-1": {
+			"$value": "#FFEE58"
+		},
+		"accent-2": {
+			"$value": "#F6CFF4"
+		},
+		"accent-3": {
+			"$value": "#503AA8"
+		},
+		"accent-4": {
+			"$value": "#686868"
+		},
+		"accent-5": {
+			"$value": "#FBFAF3"
+		}
+	}
 }

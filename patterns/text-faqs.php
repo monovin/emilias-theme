@@ -25,8 +25,8 @@
 		<div class="wp-block-columns">
 			<!-- wp:column -->
 			<div class="wp-block-column">
-				<!-- wp:group {"style":{"border":{"top":{"color":"var:preset|color|royalblush-300","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
-				<div class="wp-block-group" style="border-top-color:var(--wp--preset--color--royalblush-300);border-top-width:1px;padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">
+				<!-- wp:group {"style":{"border":{"top":{"color":"var:preset|color|accent-6","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
+				<div class="wp-block-group" style="border-top-color:var(--wp--preset--color--accent-6);border-top-width:1px;padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">
 					<!-- wp:heading {"level":3} -->
 					<h3 class="wp-block-heading"><?php echo esc_html_x( 'What is The Stories Book about?', 'Question in the FAQs pattern.', 'emilias-theme' ); ?></h3>
 					<!-- /wp:heading -->
@@ -41,8 +41,8 @@
 
 			<!-- wp:column -->
 			<div class="wp-block-column">
-				<!-- wp:group {"style":{"border":{"top":{"color":"var:preset|color|royalblush-300","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
-				<div class="wp-block-group" style="border-top-color:var(--wp--preset--color--royalblush-300);border-top-width:1px;padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">
+				<!-- wp:group {"style":{"border":{"top":{"color":"var:preset|color|accent-6","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
+				<div class="wp-block-group" style="border-top-color:var(--wp--preset--color--accent-6);border-top-width:1px;padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">
 					<!-- wp:heading {"level":3} -->
 					<h3 class="wp-block-heading"><?php echo esc_html_x( 'How much does The Stories Book cost?', 'Question in the FAQs pattern.', 'emilias-theme' ); ?></h3>
 					<!-- /wp:heading -->
@@ -61,8 +61,8 @@
 		<div class="wp-block-columns">
 			<!-- wp:column -->
 			<div class="wp-block-column">
-				<!-- wp:group {"style":{"border":{"top":{"color":"var:preset|color|royalblush-300","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
-				<div class="wp-block-group" style="border-top-color:var(--wp--preset--color--royalblush-300);border-top-width:1px;padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">
+				<!-- wp:group {"style":{"border":{"top":{"color":"var:preset|color|accent-6","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
+				<div class="wp-block-group" style="border-top-color:var(--wp--preset--color--accent-6);border-top-width:1px;padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">
 					<!-- wp:heading {"level":3} -->
 					<h3 class="wp-block-heading"><?php echo esc_html_x( 'When will The Stories Book be released?', 'Question in the FAQs pattern.', 'emilias-theme' ); ?></h3>
 					<!-- /wp:heading -->
@@ -77,8 +77,8 @@
 
 			<!-- wp:column -->
 			<div class="wp-block-column">
-				<!-- wp:group {"style":{"border":{"top":{"color":"var:preset|color|royalblush-300","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
-				<div class="wp-block-group" style="border-top-color:var(--wp--preset--color--royalblush-300);border-top-width:1px;padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">
+				<!-- wp:group {"style":{"border":{"top":{"color":"var:preset|color|accent-6","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
+				<div class="wp-block-group" style="border-top-color:var(--wp--preset--color--accent-6);border-top-width:1px;padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">
 					<!-- wp:heading {"level":3} -->
 					<h3 class="wp-block-heading"><?php echo esc_html_x( 'Are signed copies available?', 'Question in the FAQs pattern.', 'emilias-theme' ); ?></h3>
 					<!-- /wp:heading -->

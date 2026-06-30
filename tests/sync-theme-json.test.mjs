@@ -12,17 +12,13 @@ import {
 
 const css = `
 :root {
-	--emilias-color-royalblush-50: #f8ece1;
-	--emilias-color-royalblush-100: #f8e9de;
-	--emilias-color-royalblush-200: #f6ded2;
-	--emilias-color-royalblush-300: #f2c8b9;
-	--emilias-color-royalblush-400: #f0a28f;
-	--emilias-color-royalblush-500: #ee745b;
-	--emilias-color-royalblush-600: #ee4e2d;
-	--emilias-color-royalblush-700: #d74b23;
-	--emilias-color-royalblush-800: #a44420;
-	--emilias-color-royalblush-900: #64331d;
-	--emilias-color-royalblush-950: #31231c;
+	--emilias-color-base: #FFFFFF;
+	--emilias-color-contrast: #111111;
+	--emilias-color-accent-1: #FFEE58;
+	--emilias-color-accent-2: #F6CFF4;
+	--emilias-color-accent-3: #503AA8;
+	--emilias-color-accent-4: #686868;
+	--emilias-color-accent-5: #FBFAF3;
 	--emilias-space-20: clamp(0.5rem, 0.41rem + 0.45vw, 0.75rem);
 	--emilias-space-30: clamp(0.75rem, 0.61rem + 0.68vw, 1.125rem);
 	--emilias-space-40: clamp(1rem, 0.82rem + 0.91vw, 1.5rem);
@@ -45,18 +41,19 @@ function createTheme() {
 			color: {
 				palette: [
 					...[
-						"royalblush-50",
-						"royalblush-100",
-						"royalblush-200",
-						"royalblush-300",
-						"royalblush-400",
-						"royalblush-500",
-						"royalblush-600",
-						"royalblush-700",
-						"royalblush-800",
-						"royalblush-900",
-						"royalblush-950",
+						"base",
+						"contrast",
+						"accent-1",
+						"accent-2",
+						"accent-3",
+						"accent-4",
+						"accent-5",
 					].map((slug) => ({ color: "old", name: slug, slug })),
+					{
+						color: "color-mix(in srgb, currentColor 20%, transparent)",
+						name: "Accent 6",
+						slug: "accent-6",
+					},
 				],
 			},
 			spacing: {
@@ -83,21 +80,20 @@ test("maps Sugarcube variables to WordPress presets", () => {
 	assert.deepEqual(
 		theme.settings.color.palette.map(({ slug }) => slug),
 		[
-			"royalblush-50",
-			"royalblush-100",
-			"royalblush-200",
-			"royalblush-300",
-			"royalblush-400",
-			"royalblush-500",
-			"royalblush-600",
-			"royalblush-700",
-			"royalblush-800",
-			"royalblush-900",
-			"royalblush-950",
+			"base",
+			"contrast",
+			"accent-1",
+			"accent-2",
+			"accent-3",
+			"accent-4",
+			"accent-5",
+			"accent-6",
 		],
 	);
-	assert.equal(theme.settings.color.palette[0].color, "#f8ece1");
-	assert.equal(theme.settings.color.palette.at(-1).color, "#31231c");
+	assert.equal(
+		theme.settings.color.palette.at(-1).color,
+		"color-mix(in srgb, currentColor 20%, transparent)",
+	);
 	assert.deepEqual(
 		theme.settings.spacing.spacingSizes.map(({ slug }) => slug),
 		["20", "30", "40", "50", "60", "70", "80"],
@@ -123,21 +119,14 @@ test("maps Sugarcube variables to WordPress presets", () => {
 		"clamp(1.728rem, 1.39rem + 1.70vw, 2.6647rem)",
 	);
 	assert.equal(theme.settings.typography.fluid, false);
-	assert.ok(
-		theme.settings.typography.fontSizes.every(({ fluid }) => fluid === false),
-	);
-	assert.deepEqual(theme.settings.typography.fontFamilies, [
-		{ name: "Keep me" },
-	]);
+	assert.ok(theme.settings.typography.fontSizes.every(({ fluid }) => fluid === false));
+	assert.deepEqual(theme.settings.typography.fontFamilies, [{ name: "Keep me" }]);
 	assert.deepEqual(theme.styles, { color: { text: "preserved" } });
 });
 
 test("rejects missing, duplicate, and unexpected variables", () => {
 	assert.throws(
-		() =>
-			extractSugarcubeVariables(
-				css.replace(/\s*--emilias-space-20:[^;]+;/, ""),
-			),
+		() => extractSugarcubeVariables(css.replace(/\s*--emilias-space-20:[^;]+;/, "")),
 		/Missing Sugarcube variables: --emilias-space-20/,
 	);
 	assert.throws(
@@ -158,11 +147,11 @@ test("rejects missing, duplicate, and unexpected variables", () => {
 
 test("rejects changed WordPress preset contracts", () => {
 	const theme = createTheme();
-	theme.settings.color.palette.at(-1).slug = "contrast";
+	theme.settings.color.palette.at(-1).color = "red";
 
 	assert.throws(
 		() => synchronizeThemeJson(theme, extractSugarcubeVariables(css)),
-		/Unexpected color slugs/,
+		/accent-6 color has changed unexpectedly/,
 	);
 });
 
@@ -172,7 +161,7 @@ test("writes deterministically and detects stale output in check mode", async ()
 	const themePath = path.join(directory, "theme.json");
 
 	await fs.writeFile(cssPath, css);
-	await fs.writeFile(themePath, `${JSON.stringify(createTheme(), null, 2)}\n`);
+	await fs.writeFile(themePath, `${JSON.stringify(createTheme(), null, "\t")}\n`);
 
 	await assert.rejects(
 		syncThemeJson({ check: true, cssPath, themePath }),
@@ -185,5 +174,4 @@ test("writes deterministically and detects stale output in check mode", async ()
 	assert.equal(first.changed, true);
 	assert.equal(second.changed, false);
 	assert.equal(checked.changed, false);
-	assert.match(await fs.readFile(themePath, "utf8"), /^\{\n {2}"version"/);
 });

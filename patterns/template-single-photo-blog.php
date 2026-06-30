@@ -34,7 +34,7 @@
 						<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"fontSize":"small","layout":{"type":"constrained"}} -->
 						<div class="wp-block-group has-small-font-size">
 							<!-- wp:paragraph --><p><?php echo esc_html_x( 'Published on', 'Prefix before the post date block.', 'emilias-theme' ); ?></p><!-- /wp:paragraph -->
-							<!-- wp:post-date {"style":{"elements":{"link":{"color":{"text":"var:preset|color|royalblush-950"}}}},"textColor":"royalblush-950"} /-->
+							<!-- wp:post-date {"style":{"elements":{"link":{"color":{"text":"var:preset|color|contrast"}}}},"textColor":"contrast"} /-->
 						</div>
 						<!-- /wp:group -->
 						<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"fontSize":"small","layout":{"type":"constrained"}} -->

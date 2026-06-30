@@ -21,7 +21,7 @@ Edit the appropriate source file:
 
 | Presets | Source |
 | --- | --- |
-| `royalblush-50` through `royalblush-950` | `tokens/colors.json` |
+| `base`, `contrast`, `accent-1` through `accent-5` | `tokens/colors.json` |
 | Spacing `20` through `80` | `tokens/spacing.json` |
 | Font sizes `small` through `xx-large` | `tokens/typography.json` |
 
@@ -106,6 +106,18 @@ Typography maps Sugarcube's numeric steps to semantic WordPress presets:
 The generated `clamp()` values are written directly to `theme.json`.
 WordPress's own fluid calculation is disabled so it does not alter Sugarcube's
 curves.
+
+## The `accent-6` exception
+
+`accent-6` is not a concrete color. It depends on the current text color:
+
+```css
+color-mix(in srgb, currentColor 20%, transparent)
+```
+
+It remains WordPress-owned inside `scripts/sync-theme-json.mjs`. The sync script
+appends it after the Sugarcube-owned palette and fails if its value changes
+unexpectedly.
 
 ## Available commands
 

@@ -24,7 +24,7 @@
 		<!-- /wp:group -->
 		<!-- wp:group {"layout":{"type":"constrained","justifyContent":"left"}} -->
 		<div class="wp-block-group">
-			<!-- wp:navigation {"overlayBackgroundColor":"royalblush-50","overlayTextColor":"royalblush-950","layout":{"type":"flex","orientation":"vertical"}} /-->
+			<!-- wp:navigation {"overlayBackgroundColor":"base","overlayTextColor":"contrast","layout":{"type":"flex","orientation":"vertical"}} /-->
 		</div>
 		<!-- /wp:group -->
 		<!-- wp:site-logo /-->
