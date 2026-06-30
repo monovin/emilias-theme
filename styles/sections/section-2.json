@@ -10,8 +10,8 @@
 	],
 	"styles": {
 		"color": {
-			"background": "var:preset|color|accent-2",
-			"text": "var:preset|color|contrast"
+			"background": "var:preset|color|royalblush-200",
+			"text": "var:preset|color|royalblush-950"
 		},
 		"blocks": {
 			"core/separator": {

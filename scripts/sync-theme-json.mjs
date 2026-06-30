@@ -4,23 +4,68 @@ import { fileURLToPath } from "node:url";
 
 import postcss from "postcss";
 
-const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT_DIR = path.resolve(
+	path.dirname(fileURLToPath(import.meta.url)),
+	"..",
+);
 
 const COLOR_PRESETS = [
-	{ name: "Base", slug: "base", variable: "--emilias-color-base" },
-	{ name: "Contrast", slug: "contrast", variable: "--emilias-color-contrast" },
-	{ name: "Accent 1", slug: "accent-1", variable: "--emilias-color-accent-1" },
-	{ name: "Accent 2", slug: "accent-2", variable: "--emilias-color-accent-2" },
-	{ name: "Accent 3", slug: "accent-3", variable: "--emilias-color-accent-3" },
-	{ name: "Accent 4", slug: "accent-4", variable: "--emilias-color-accent-4" },
-	{ name: "Accent 5", slug: "accent-5", variable: "--emilias-color-accent-5" },
+	{
+		name: "Royal Blush 50",
+		slug: "royalblush-50",
+		variable: "--emilias-color-royalblush-50",
+	},
+	{
+		name: "Royal Blush 100",
+		slug: "royalblush-100",
+		variable: "--emilias-color-royalblush-100",
+	},
+	{
+		name: "Royal Blush 200",
+		slug: "royalblush-200",
+		variable: "--emilias-color-royalblush-200",
+	},
+	{
+		name: "Royal Blush 300",
+		slug: "royalblush-300",
+		variable: "--emilias-color-royalblush-300",
+	},
+	{
+		name: "Royal Blush 400",
+		slug: "royalblush-400",
+		variable: "--emilias-color-royalblush-400",
+	},
+	{
+		name: "Royal Blush 500",
+		slug: "royalblush-500",
+		variable: "--emilias-color-royalblush-500",
+	},
+	{
+		name: "Royal Blush 600",
+		slug: "royalblush-600",
+		variable: "--emilias-color-royalblush-600",
+	},
+	{
+		name: "Royal Blush 700",
+		slug: "royalblush-700",
+		variable: "--emilias-color-royalblush-700",
+	},
+	{
+		name: "Royal Blush 800",
+		slug: "royalblush-800",
+		variable: "--emilias-color-royalblush-800",
+	},
+	{
+		name: "Royal Blush 900",
+		slug: "royalblush-900",
+		variable: "--emilias-color-royalblush-900",
+	},
+	{
+		name: "Royal Blush 950",
+		slug: "royalblush-950",
+		variable: "--emilias-color-royalblush-950",
+	},
 ];
-
-const DERIVED_COLOR_PRESET = {
-	color: "color-mix(in srgb, currentColor 20%, transparent)",
-	name: "Accent 6",
-	slug: "accent-6",
-};
 
 const SPACING_PRESETS = [
 	{ name: "Tiny", slug: "20", variable: "--emilias-space-20" },
@@ -37,7 +82,11 @@ const FONT_SIZE_PRESETS = [
 	{ name: "Medium", slug: "medium", variable: "--emilias-font-size-0" },
 	{ name: "Large", slug: "large", variable: "--emilias-font-size-1" },
 	{ name: "Extra Large", slug: "x-large", variable: "--emilias-font-size-2" },
-	{ name: "Extra Extra Large", slug: "xx-large", variable: "--emilias-font-size-3" },
+	{
+		name: "Extra Extra Large",
+		slug: "xx-large",
+		variable: "--emilias-font-size-3",
+	},
 ];
 
 const EXPECTED_VARIABLES = new Set(
@@ -68,6 +117,12 @@ function presetValue(variables, preset) {
 	return value;
 }
 
+function detectJsonIndent(json) {
+	const match = json.match(/\n([ \t]+)"/);
+
+	return match?.[1] ?? "\t";
+}
+
 export function extractSugarcubeVariables(css) {
 	const root = postcss.parse(css);
 	const variables = new Map();
@@ -90,7 +145,9 @@ export function extractSugarcubeVariables(css) {
 		(variable) => !EXPECTED_VARIABLES.has(variable),
 	);
 	if (unexpected.length > 0) {
-		throw new Error(`Unexpected Sugarcube variables: ${unexpected.join(", ")}.`);
+		throw new Error(
+			`Unexpected Sugarcube variables: ${unexpected.join(", ")}.`,
+		);
 	}
 
 	const missing = [...EXPECTED_VARIABLES].filter(
@@ -108,12 +165,14 @@ export function synchronizeThemeJson(theme, variables) {
 	const { settings } = nextTheme;
 
 	if (!settings?.color || !settings?.spacing || !settings?.typography) {
-		throw new Error("theme.json must define color, spacing, and typography settings.");
+		throw new Error(
+			"theme.json must define color, spacing, and typography settings.",
+		);
 	}
 
 	assertPresetSlugs(
 		settings.color.palette,
-		[...COLOR_PRESETS.map((preset) => preset.slug), DERIVED_COLOR_PRESET.slug],
+		COLOR_PRESETS.map((preset) => preset.slug),
 		"color",
 	);
 	assertPresetSlugs(
@@ -127,19 +186,11 @@ export function synchronizeThemeJson(theme, variables) {
 		"font-size",
 	);
 
-	const currentDerivedColor = settings.color.palette.at(-1);
-	if (currentDerivedColor.color !== DERIVED_COLOR_PRESET.color) {
-		throw new Error("The WordPress-owned accent-6 color has changed unexpectedly.");
-	}
-
-	settings.color.palette = [
-		...COLOR_PRESETS.map((preset) => ({
-			color: presetValue(variables, preset),
-			name: preset.name,
-			slug: preset.slug,
-		})),
-		{ ...DERIVED_COLOR_PRESET },
-	];
+	settings.color.palette = COLOR_PRESETS.map((preset) => ({
+		color: presetValue(variables, preset),
+		name: preset.name,
+		slug: preset.slug,
+	}));
 
 	settings.spacing.spacingSizes = SPACING_PRESETS.map((preset) => ({
 		name: preset.name,
@@ -170,7 +221,7 @@ export async function syncThemeJson({
 	const currentTheme = JSON.parse(currentJson);
 	const variables = extractSugarcubeVariables(css);
 	const nextTheme = synchronizeThemeJson(currentTheme, variables);
-	const nextJson = `${JSON.stringify(nextTheme, null, "\t")}\n`;
+	const nextJson = `${JSON.stringify(nextTheme, null, detectJsonIndent(currentJson))}\n`;
 	const changed = currentJson !== nextJson;
 
 	if (check && changed) {
@@ -185,7 +236,8 @@ export async function syncThemeJson({
 }
 
 const isMain =
-	process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+	process.argv[1] &&
+	path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isMain) {
 	try {

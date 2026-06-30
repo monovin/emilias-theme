@@ -15,8 +15,8 @@
  */
 
 ?>
-<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/coming-soon-bg-image.webp","alt":"Photo of a field full of flowers, a blue sky and a tree.","dimRatio":10,"minHeight":100,"minHeightUnit":"vh","align":"full","style":{"elements":{"link":{"color":{"text":"var:preset|color|accent-1"}},"heading":{"color":{"text":"var:preset|color|accent-1"}}},"spacing":{"padding":{"right":"var:preset|spacing|50","left":"var:preset|spacing|50","top":"200px","bottom":"200px"},"margin":{"top":"0","bottom":"0"},"blockGap":"var:preset|spacing|40"}},"textColor":"accent-1","layout":{"type":"constrained"}} -->
-<div class="wp-block-cover alignfull has-accent-1-color has-text-color has-link-color" style="margin-top:0;margin-bottom:0;padding-top:200px;padding-right:var(--wp--preset--spacing--50);padding-bottom:200px;padding-left:var(--wp--preset--spacing--50);min-height:100vh"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-10 has-background-dim"></span><img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Photo of a field full of flowers, a blue sky and a tree.', 'emilias-theme' ); ?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/coming-soon-bg-image.webp" data-object-fit="cover"/>
+<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/coming-soon-bg-image.webp","alt":"Photo of a field full of flowers, a blue sky and a tree.","dimRatio":10,"minHeight":100,"minHeightUnit":"vh","align":"full","style":{"elements":{"link":{"color":{"text":"var:preset|color|royalblush-400"}},"heading":{"color":{"text":"var:preset|color|royalblush-400"}}},"spacing":{"padding":{"right":"var:preset|spacing|50","left":"var:preset|spacing|50","top":"200px","bottom":"200px"},"margin":{"top":"0","bottom":"0"},"blockGap":"var:preset|spacing|40"}},"textColor":"royalblush-400","layout":{"type":"constrained"}} -->
+<div class="wp-block-cover alignfull has-royalblush-400-color has-text-color has-link-color" style="margin-top:0;margin-bottom:0;padding-top:200px;padding-right:var(--wp--preset--spacing--50);padding-bottom:200px;padding-left:var(--wp--preset--spacing--50);min-height:100vh"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-10 has-background-dim"></span><img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Photo of a field full of flowers, a blue sky and a tree.', 'emilias-theme' ); ?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/coming-soon-bg-image.webp" data-object-fit="cover"/>
 	<div class="wp-block-cover__inner-container">
 		<!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 		<div class="wp-block-group">
@@ -35,8 +35,8 @@
 
 		<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
 		<div class="wp-block-buttons">
-			<!-- wp:button {"backgroundColor":"accent-1","textColor":"contrast","className":"is-style-fill","style":{"elements":{"link":{"color":{"text":"var:preset|color|contrast"}}}},"borderColor":"accent-1"} -->
-			<div class="wp-block-button is-style-fill"><a class="wp-block-button__link has-contrast-color has-accent-1-background-color has-text-color has-background has-link-color has-border-color has-accent-1-border-color wp-element-button"><?php esc_html_e( 'Subscribe', 'emilias-theme' ); ?></a></div>
+			<!-- wp:button {"backgroundColor":"royalblush-400","textColor":"royalblush-950","className":"is-style-fill","style":{"elements":{"link":{"color":{"text":"var:preset|color|royalblush-950"}}}},"borderColor":"royalblush-400"} -->
+			<div class="wp-block-button is-style-fill"><a class="wp-block-button__link has-royalblush-950-color has-royalblush-400-background-color has-text-color has-background has-link-color has-border-color has-royalblush-400-border-color wp-element-button"><?php esc_html_e( 'Subscribe', 'emilias-theme' ); ?></a></div>
 			<!-- /wp:button -->
 		</div>
 		<!-- /wp:buttons -->

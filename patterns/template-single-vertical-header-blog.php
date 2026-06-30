@@ -31,7 +31,7 @@
 				<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between","verticalAlignment":"top"}} -->
 				<div class="wp-block-group">
 					<!-- wp:post-title {"level":1,"style":{"layout":{"selfStretch":"fixed","flexSize":"70vw"}},"fontSize":"xx-large"} /-->
-					<!-- wp:post-date {"textAlign":"right","style":{"elements":{"link":{"color":{"text":"var:preset|color|contrast"}}}},"textColor":"contrast","fontSize":"small"} /-->
+					<!-- wp:post-date {"textAlign":"right","style":{"elements":{"link":{"color":{"text":"var:preset|color|royalblush-950"}}}},"textColor":"royalblush-950","fontSize":"small"} /-->
 					</div>
 				<!-- /wp:group -->
 
@@ -79,8 +79,8 @@
 				<!-- /wp:spacer -->
 			</div>
 			<!-- /wp:group -->
-			<!-- wp:group {"ariaLabel":"<?php esc_attr_e( 'Post navigation', 'emilias-theme' ); ?>","tagName":"nav","align":"full","style":{"border":{"top":{"color":"var:preset|color|accent-6","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"},"blockGap":"var:preset|spacing|40"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"left"}} -->
-			<nav class="wp-block-group alignfull" aria-label="<?php esc_attr_e( 'Post navigation', 'emilias-theme' ); ?>" style="border-top-color:var(--wp--preset--color--accent-6);border-top-width:1px;padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40)">
+			<!-- wp:group {"ariaLabel":"<?php esc_attr_e( 'Post navigation', 'emilias-theme' ); ?>","tagName":"nav","align":"full","style":{"border":{"top":{"color":"var:preset|color|royalblush-300","width":"1px"}},"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"},"blockGap":"var:preset|spacing|40"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"left"}} -->
+			<nav class="wp-block-group alignfull" aria-label="<?php esc_attr_e( 'Post navigation', 'emilias-theme' ); ?>" style="border-top-color:var(--wp--preset--color--royalblush-300);border-top-width:1px;padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40)">
 				<!-- wp:post-navigation-link {"type":"previous","showTitle":true,"arrow":"arrow"} /-->
 				<!-- wp:post-navigation-link {"showTitle":true,"arrow":"arrow"} /-->
 			</nav>
