@@ -60,6 +60,29 @@ from the generated `theme.json` values.
 Sugarcube calculates fluid spacing and type over a viewport range of 320px to
 1200px, configured in `sugarcube.config.js`.
 
+## LQIP workflow
+
+The theme uses low quality image placeholders for both bundled pattern images
+and WordPress media library images.
+
+Bundled images under `assets/images/` are scanned by:
+
+```sh
+npm run lqip:generate
+```
+
+This writes `assets/generated/lqip.json`, keyed by theme-relative image paths.
+The generator reuses existing placeholders when file size and hash are
+unchanged.
+
+Uploaded media gets a base64 placeholder stored in attachment metadata whenever
+WordPress generates or regenerates attachment metadata. Existing uploads can
+also receive placeholders lazily the first time the theme renders them.
+
+The same metadata includes average thumbnail colors for index masonry posts.
+The hover styling lives in `style.css`: the Post Template is the selector scope,
+while each `li.wp-block-post` owns its own thumbnail color variables.
+
 ## Scale recipes
 
 Spacing and font sizes use Sugarcube's `sh.sugarcube.scale` extension. The
@@ -128,6 +151,8 @@ unexpectedly.
 | `npm run tokens:sync` | Synchronize generated CSS values into `theme.json`. |
 | `npm run tokens:generate` | Validate, generate, and synchronize in one command. |
 | `npm run tokens:check` | Fail when `theme.json` is stale or tokens are invalid. |
+| `npm run lqip:generate` | Generate placeholders for bundled theme images. |
+| `npm run lqip:check` | Fail when the bundled-image placeholder manifest is stale. |
 | `npm test` | Run the synchronization tests. |
 | `npm run build` | Generate tokens and build the production stylesheet. |
 

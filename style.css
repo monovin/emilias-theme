@@ -122,6 +122,37 @@ p {
     overflow-x: auto;
 }
 
+/* LQIP placeholders */
+img.has-lqip {
+    background-color: color-mix(in srgb, currentColor 8%, transparent);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage) > li.wp-block-post.has-thumbnail-color {
+    --emilias-thumb-text: var(--emilias-thumb-fg);
+}
+
+.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage) > li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) {
+    background-color: var(--emilias-thumb-bg);
+    color: var(--emilias-thumb-text);
+}
+
+.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage) > li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) :where(a, [class*="gb-element-"], .gb-text, .wp-block-post-title) {
+    color: var(--emilias-thumb-text);
+}
+
+.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage) > li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) .wp-block-post-featured-image {
+    background-color: var(--emilias-thumb-bg);
+}
+
+@supports (color: contrast-color(white)) {
+    .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage) > li.wp-block-post.has-thumbnail-color {
+        --emilias-thumb-text: contrast-color(var(--emilias-thumb-bg));
+    }
+}
+
 /*
 Reference
 https://piccalil.li/blog/why-im-excited-about-text-box-trim-as-a-designer/

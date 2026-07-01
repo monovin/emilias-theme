@@ -1,0 +1,995 @@
+<?php
+/**
+ * Low quality image placeholder support.
+ *
+ * @package WordPress
+ * @subpackage Twenty_Twenty_Five
+ * @since Emilias theme 1.0
+ */
+
+if ( ! function_exists( 'emilias_theme_lqip_data_uri_is_valid' ) ) :
+	/**
+	 * Checks whether a placeholder data URI is safe to place in inline CSS.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed $data_uri Potential image data URI.
+	 * @return bool Whether the data URI has the expected image/base64 shape.
+	 */
+	function emilias_theme_lqip_data_uri_is_valid( $data_uri ) {
+		return is_string( $data_uri )
+			&& 1 === preg_match( '~^data:image/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$~', $data_uri );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_supported_mime_types' ) ) :
+	/**
+	 * Returns the image MIME types supported by the LQIP generator.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @return string[] Supported image MIME types.
+	 */
+	function emilias_theme_lqip_supported_mime_types() {
+		return apply_filters(
+			'emilias_theme_lqip_supported_mime_types',
+			array( 'image/jpeg', 'image/png', 'image/webp' )
+		);
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_extension_for_mime_type' ) ) :
+	/**
+	 * Returns a file extension for a supported image MIME type.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $mime_type Image MIME type.
+	 * @return string Image extension.
+	 */
+	function emilias_theme_lqip_extension_for_mime_type( $mime_type ) {
+		switch ( $mime_type ) {
+			case 'image/png':
+				return 'png';
+			case 'image/webp':
+				return 'webp';
+			case 'image/jpeg':
+			default:
+				return 'jpg';
+		}
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_create_data_uri' ) ) :
+	/**
+	 * Creates a tiny base64 placeholder for an image file.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $file      Absolute image path.
+	 * @param string $mime_type Source image MIME type.
+	 * @return array Placeholder data, or an empty array on failure.
+	 */
+	function emilias_theme_lqip_create_data_uri( $file, $mime_type ) {
+		if ( ! is_string( $file ) || '' === $file || ! file_exists( $file ) ) {
+			return array();
+		}
+
+		if ( ! in_array( $mime_type, emilias_theme_lqip_supported_mime_types(), true ) ) {
+			return array();
+		}
+
+		$image = wp_get_image_editor( $file );
+
+		if ( is_wp_error( $image ) ) {
+			return array();
+		}
+
+		$size = absint( apply_filters( 'emilias_theme_lqip_size', 32, $file, $mime_type ) );
+		$size = max( 8, min( 64, $size ) );
+
+		$resized = $image->resize( $size, $size, false );
+
+		if ( is_wp_error( $resized ) ) {
+			return array();
+		}
+
+		$quality = absint( apply_filters( 'emilias_theme_lqip_quality', 24, $file, $mime_type ) );
+		$quality = max( 1, min( 100, $quality ) );
+
+		$image->set_quality( $quality );
+
+		$temp_dir  = get_temp_dir();
+		$extension = emilias_theme_lqip_extension_for_mime_type( $mime_type );
+		$temp_file = trailingslashit( $temp_dir ) . wp_unique_filename(
+			$temp_dir,
+			'emilias-lqip-' . wp_generate_uuid4() . '.' . $extension
+		);
+		$saved     = $image->save( $temp_file, $mime_type );
+
+		if ( is_wp_error( $saved ) || empty( $saved['path'] ) || ! file_exists( $saved['path'] ) ) {
+			return array();
+		}
+
+		$placeholder = file_get_contents( $saved['path'] );
+		wp_delete_file( $saved['path'] );
+
+		if ( false === $placeholder || '' === $placeholder ) {
+			return array();
+		}
+
+		$saved_mime_type = isset( $saved['mime-type'] ) ? $saved['mime-type'] : $mime_type;
+		$data_uri        = 'data:' . $saved_mime_type . ';base64,' . base64_encode( $placeholder );
+
+		if ( ! emilias_theme_lqip_data_uri_is_valid( $data_uri ) ) {
+			return array();
+		}
+
+		return array(
+			'data_uri'  => $data_uri,
+			'width'     => isset( $saved['width'] ) ? absint( $saved['width'] ) : 0,
+			'height'    => isset( $saved['height'] ) ? absint( $saved['height'] ) : 0,
+			'mime_type' => $saved_mime_type,
+			'filesize'  => strlen( $placeholder ),
+		);
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_hex_color_is_valid' ) ) :
+	/**
+	 * Checks whether a color is a safe six-digit hex color.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed $color Potential hex color.
+	 * @return bool Whether the color is valid.
+	 */
+	function emilias_theme_lqip_hex_color_is_valid( $color ) {
+		return is_string( $color ) && 1 === preg_match( '/^#[0-9a-f]{6}$/i', $color );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_rgb_to_hex' ) ) :
+	/**
+	 * Converts RGB channels to a hex color.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int $red   Red channel.
+	 * @param int $green Green channel.
+	 * @param int $blue  Blue channel.
+	 * @return string Hex color.
+	 */
+	function emilias_theme_lqip_rgb_to_hex( $red, $green, $blue ) {
+		return sprintf(
+			'#%02x%02x%02x',
+			max( 0, min( 255, absint( $red ) ) ),
+			max( 0, min( 255, absint( $green ) ) ),
+			max( 0, min( 255, absint( $blue ) ) )
+		);
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_srgb_channel_to_linear' ) ) :
+	/**
+	 * Converts an sRGB channel to linear light.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int $channel RGB channel.
+	 * @return float Linear channel.
+	 */
+	function emilias_theme_lqip_srgb_channel_to_linear( $channel ) {
+		$channel = max( 0, min( 255, absint( $channel ) ) ) / 255;
+
+		return $channel <= 0.03928
+			? $channel / 12.92
+			: pow( ( $channel + 0.055 ) / 1.055, 2.4 );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_relative_luminance' ) ) :
+	/**
+	 * Calculates WCAG relative luminance for an RGB color.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int $red   Red channel.
+	 * @param int $green Green channel.
+	 * @param int $blue  Blue channel.
+	 * @return float Relative luminance.
+	 */
+	function emilias_theme_lqip_relative_luminance( $red, $green, $blue ) {
+		return 0.2126 * emilias_theme_lqip_srgb_channel_to_linear( $red )
+			+ 0.7152 * emilias_theme_lqip_srgb_channel_to_linear( $green )
+			+ 0.0722 * emilias_theme_lqip_srgb_channel_to_linear( $blue );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_contrast_ratio' ) ) :
+	/**
+	 * Calculates contrast ratio from two relative luminance values.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param float $first_luminance  First relative luminance.
+	 * @param float $second_luminance Second relative luminance.
+	 * @return float Contrast ratio.
+	 */
+	function emilias_theme_lqip_contrast_ratio( $first_luminance, $second_luminance ) {
+		$lighter = max( $first_luminance, $second_luminance );
+		$darker  = min( $first_luminance, $second_luminance );
+
+		return ( $lighter + 0.05 ) / ( $darker + 0.05 );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_foreground_color_for_rgb' ) ) :
+	/**
+	 * Chooses black or white text for a background RGB color.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int $red   Red channel.
+	 * @param int $green Green channel.
+	 * @param int $blue  Blue channel.
+	 * @return string Hex foreground color.
+	 */
+	function emilias_theme_lqip_foreground_color_for_rgb( $red, $green, $blue ) {
+		$background_luminance = emilias_theme_lqip_relative_luminance( $red, $green, $blue );
+		$black_contrast       = emilias_theme_lqip_contrast_ratio( $background_luminance, 0 );
+		$white_contrast       = emilias_theme_lqip_contrast_ratio( $background_luminance, 1 );
+
+		return $white_contrast >= $black_contrast ? '#ffffff' : '#000000';
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_create_color_metadata' ) ) :
+	/**
+	 * Creates average background and fallback foreground colors for an image file.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $file      Absolute image path.
+	 * @param string $mime_type Source image MIME type.
+	 * @return array Color metadata, or an empty array on failure.
+	 */
+	function emilias_theme_lqip_create_color_metadata( $file, $mime_type ) {
+		if (
+			! is_string( $file )
+			|| '' === $file
+			|| ! file_exists( $file )
+			|| ! function_exists( 'imagecreatefromstring' )
+		) {
+			return array();
+		}
+
+		if ( ! in_array( $mime_type, emilias_theme_lqip_supported_mime_types(), true ) ) {
+			return array();
+		}
+
+		$image = wp_get_image_editor( $file );
+
+		if ( is_wp_error( $image ) ) {
+			return array();
+		}
+
+		$resized = $image->resize( 1, 1, false );
+
+		if ( is_wp_error( $resized ) ) {
+			return array();
+		}
+
+		$temp_dir  = get_temp_dir();
+		$temp_file = trailingslashit( $temp_dir ) . wp_unique_filename(
+			$temp_dir,
+			'emilias-lqip-color-' . wp_generate_uuid4() . '.png'
+		);
+		$saved     = $image->save( $temp_file, 'image/png' );
+
+		if ( is_wp_error( $saved ) || empty( $saved['path'] ) || ! file_exists( $saved['path'] ) ) {
+			return array();
+		}
+
+		$contents = file_get_contents( $saved['path'] );
+		wp_delete_file( $saved['path'] );
+
+		if ( false === $contents || '' === $contents ) {
+			return array();
+		}
+
+		$resource = imagecreatefromstring( $contents );
+
+		if ( false === $resource ) {
+			return array();
+		}
+
+		$pixel  = imagecolorat( $resource, 0, 0 );
+		$colors = imagecolorsforindex( $resource, $pixel );
+		imagedestroy( $resource );
+
+		if ( ! is_array( $colors ) || ! isset( $colors['red'], $colors['green'], $colors['blue'] ) ) {
+			return array();
+		}
+
+		$alpha = isset( $colors['alpha'] ) ? max( 0, min( 127, absint( $colors['alpha'] ) ) ) : 0;
+
+		if ( $alpha > 0 ) {
+			$opacity         = 1 - ( $alpha / 127 );
+			$colors['red']   = (int) round( $colors['red'] * $opacity + 255 * ( 1 - $opacity ) );
+			$colors['green'] = (int) round( $colors['green'] * $opacity + 255 * ( 1 - $opacity ) );
+			$colors['blue']  = (int) round( $colors['blue'] * $opacity + 255 * ( 1 - $opacity ) );
+		}
+
+		$background_color = emilias_theme_lqip_rgb_to_hex( $colors['red'], $colors['green'], $colors['blue'] );
+
+		return array(
+			'background_color' => $background_color,
+			'foreground_color' => emilias_theme_lqip_foreground_color_for_rgb( $colors['red'], $colors['green'], $colors['blue'] ),
+		);
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_metadata_has_colors' ) ) :
+	/**
+	 * Checks whether an LQIP metadata entry has valid color values.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed $entry LQIP metadata entry.
+	 * @return bool Whether the metadata has valid colors.
+	 */
+	function emilias_theme_lqip_metadata_has_colors( $entry ) {
+		return is_array( $entry )
+			&& ! empty( $entry['background_color'] )
+			&& ! empty( $entry['foreground_color'] )
+			&& emilias_theme_lqip_hex_color_is_valid( $entry['background_color'] )
+			&& emilias_theme_lqip_hex_color_is_valid( $entry['foreground_color'] );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_create_attachment_metadata_entry' ) ) :
+	/**
+	 * Creates the LQIP metadata entry for an attachment file.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $file      Absolute image path.
+	 * @param string $mime_type Source image MIME type.
+	 * @return array LQIP metadata entry, or an empty array on failure.
+	 */
+	function emilias_theme_lqip_create_attachment_metadata_entry( $file, $mime_type ) {
+		$placeholder = emilias_theme_lqip_create_data_uri( $file, $mime_type );
+
+		if ( empty( $placeholder ) ) {
+			return array();
+		}
+
+		return array_merge(
+			$placeholder,
+			emilias_theme_lqip_create_color_metadata( $file, $mime_type ),
+			array(
+				'source_filesize'  => file_exists( $file ) ? filesize( $file ) : 0,
+				'source_mime_type' => $mime_type,
+			)
+		);
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_generate_attachment_metadata' ) ) :
+	/**
+	 * Stores a base64 LQIP placeholder in attachment metadata.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param array  $metadata      Generated attachment metadata.
+	 * @param int    $attachment_id Current attachment ID.
+	 * @param string $context       Metadata generation context.
+	 * @return array Updated attachment metadata.
+	 */
+	function emilias_theme_lqip_generate_attachment_metadata( $metadata, $attachment_id, $context = 'create' ) {
+		unset( $context );
+
+		if ( ! is_array( $metadata ) ) {
+			return $metadata;
+		}
+
+		$file      = get_attached_file( $attachment_id );
+		$mime_type = get_post_mime_type( $attachment_id );
+
+		if ( ! is_string( $mime_type ) || ! in_array( $mime_type, emilias_theme_lqip_supported_mime_types(), true ) ) {
+			return $metadata;
+		}
+
+		$lqip_metadata = emilias_theme_lqip_create_attachment_metadata_entry( $file, $mime_type );
+
+		if ( empty( $lqip_metadata ) ) {
+			return $metadata;
+		}
+
+		$metadata['emilias_lqip'] = $lqip_metadata;
+
+		return $metadata;
+	}
+endif;
+add_filter( 'wp_generate_attachment_metadata', 'emilias_theme_lqip_generate_attachment_metadata', 10, 3 );
+
+if ( ! function_exists( 'emilias_theme_lqip_attachment_metadata_entry' ) ) :
+	/**
+	 * Returns the stored LQIP metadata entry, generating missing values when needed.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return array LQIP metadata entry, or an empty array.
+	 */
+	function emilias_theme_lqip_attachment_metadata_entry( $attachment_id ) {
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		if ( is_array( $metadata ) && ! empty( $metadata['emilias_lqip']['data_uri'] ) ) {
+			$entry = $metadata['emilias_lqip'];
+
+			if (
+				emilias_theme_lqip_data_uri_is_valid( $entry['data_uri'] )
+				&& emilias_theme_lqip_metadata_has_colors( $entry )
+			) {
+				return $entry;
+			}
+		}
+
+		return emilias_theme_lqip_generate_missing_attachment_metadata( $attachment_id, $metadata );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_attachment_data_uri' ) ) :
+	/**
+	 * Returns the stored LQIP data URI for an attachment.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return string Placeholder data URI, or an empty string.
+	 */
+	function emilias_theme_lqip_attachment_data_uri( $attachment_id ) {
+		$entry = emilias_theme_lqip_attachment_metadata_entry( $attachment_id );
+
+		if ( empty( $entry['data_uri'] ) ) {
+			return '';
+		}
+
+		return emilias_theme_lqip_data_uri_is_valid( $entry['data_uri'] ) ? $entry['data_uri'] : '';
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_attachment_colors' ) ) :
+	/**
+	 * Returns generated thumbnail colors for an attachment.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return array Thumbnail colors, or an empty array.
+	 */
+	function emilias_theme_lqip_attachment_colors( $attachment_id ) {
+		$entry = emilias_theme_lqip_attachment_metadata_entry( $attachment_id );
+
+		if ( ! emilias_theme_lqip_metadata_has_colors( $entry ) ) {
+			return array();
+		}
+
+		return array(
+			'background_color' => $entry['background_color'],
+			'foreground_color' => $entry['foreground_color'],
+		);
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_generate_missing_attachment_metadata' ) ) :
+	/**
+	 * Generates and persists missing LQIP metadata for existing uploads.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int        $attachment_id Attachment ID.
+	 * @param array|bool $metadata      Existing attachment metadata.
+	 * @return array LQIP metadata entry, or an empty array.
+	 */
+	function emilias_theme_lqip_generate_missing_attachment_metadata( $attachment_id, $metadata ) {
+		$should_generate = apply_filters( 'emilias_theme_lqip_generate_missing_attachment_metadata', true, $attachment_id );
+
+		if ( ! $should_generate ) {
+			return array();
+		}
+
+		$file      = get_attached_file( $attachment_id );
+		$mime_type = get_post_mime_type( $attachment_id );
+
+		if ( ! is_string( $mime_type ) || ! in_array( $mime_type, emilias_theme_lqip_supported_mime_types(), true ) ) {
+			return array();
+		}
+
+		if ( ! is_array( $metadata ) ) {
+			$metadata = array();
+		}
+
+		$entry = isset( $metadata['emilias_lqip'] ) && is_array( $metadata['emilias_lqip'] )
+			? $metadata['emilias_lqip']
+			: array();
+
+		if ( empty( $entry['data_uri'] ) || ! emilias_theme_lqip_data_uri_is_valid( $entry['data_uri'] ) ) {
+			$entry = emilias_theme_lqip_create_attachment_metadata_entry( $file, $mime_type );
+		} elseif ( ! emilias_theme_lqip_metadata_has_colors( $entry ) ) {
+			$entry = array_merge(
+				$entry,
+				emilias_theme_lqip_create_color_metadata( $file, $mime_type ),
+				array(
+					'source_filesize'  => file_exists( $file ) ? filesize( $file ) : 0,
+					'source_mime_type' => $mime_type,
+				)
+			);
+		}
+
+		if ( empty( $entry['data_uri'] ) || ! emilias_theme_lqip_data_uri_is_valid( $entry['data_uri'] ) ) {
+			return array();
+		}
+
+		if ( ! empty( $entry['background_color'] ) && ! emilias_theme_lqip_hex_color_is_valid( $entry['background_color'] ) ) {
+			unset( $entry['background_color'] );
+		}
+
+		if ( ! empty( $entry['foreground_color'] ) && ! emilias_theme_lqip_hex_color_is_valid( $entry['foreground_color'] ) ) {
+			unset( $entry['foreground_color'] );
+		}
+
+		$metadata['emilias_lqip'] = $entry;
+
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		return $entry;
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_generate_missing_attachment_data_uri' ) ) :
+	/**
+	 * Generates and persists a missing LQIP placeholder for existing uploads.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int        $attachment_id Attachment ID.
+	 * @param array|bool $metadata      Existing attachment metadata.
+	 * @return string Placeholder data URI, or an empty string.
+	 */
+	function emilias_theme_lqip_generate_missing_attachment_data_uri( $attachment_id, $metadata ) {
+		$entry = emilias_theme_lqip_generate_missing_attachment_metadata( $attachment_id, $metadata );
+
+		return ! empty( $entry['data_uri'] ) && emilias_theme_lqip_data_uri_is_valid( $entry['data_uri'] )
+			? $entry['data_uri']
+			: '';
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_manifest' ) ) :
+	/**
+	 * Loads static theme asset placeholders generated by scripts/generate-lqip.mjs.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @return array Placeholder data URIs keyed by theme-relative paths.
+	 */
+	function emilias_theme_lqip_manifest() {
+		static $manifest = null;
+
+		if ( null !== $manifest ) {
+			return $manifest;
+		}
+
+		$manifest = array();
+		$path     = get_theme_file_path( 'assets/generated/lqip.json' );
+
+		if ( ! is_readable( $path ) ) {
+			return $manifest;
+		}
+
+		$contents = file_get_contents( $path );
+
+		if ( false === $contents ) {
+			return $manifest;
+		}
+
+		$decoded = json_decode( $contents, true );
+
+		if ( ! is_array( $decoded ) || empty( $decoded['images'] ) || ! is_array( $decoded['images'] ) ) {
+			return $manifest;
+		}
+
+		foreach ( $decoded['images'] as $image_path => $image ) {
+			if ( ! is_string( $image_path ) || empty( $image['base64'] ) ) {
+				continue;
+			}
+
+			if ( emilias_theme_lqip_data_uri_is_valid( $image['base64'] ) ) {
+				$manifest[ $image_path ] = $image['base64'];
+			}
+		}
+
+		return $manifest;
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_theme_asset_data_uri' ) ) :
+	/**
+	 * Returns the LQIP placeholder for a bundled theme image URL.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $src Image URL.
+	 * @return string Placeholder data URI, or an empty string.
+	 */
+	function emilias_theme_lqip_theme_asset_data_uri( $src ) {
+		if ( ! is_string( $src ) || '' === $src ) {
+			return '';
+		}
+
+		$src = strtok( $src, '?' );
+
+		if ( ! is_string( $src ) || '' === $src ) {
+			return '';
+		}
+
+		$theme_uri = untrailingslashit( get_theme_file_uri() );
+
+		if ( 0 !== strpos( $src, $theme_uri . '/' ) ) {
+			return '';
+		}
+
+		$relative = '/' . ltrim( substr( $src, strlen( $theme_uri ) ), '/' );
+		$manifest = emilias_theme_lqip_manifest();
+
+		return isset( $manifest[ $relative ] ) ? $manifest[ $relative ] : '';
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_append_class' ) ) :
+	/**
+	 * Adds a class name to an existing class attribute value.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed  $classes    Existing class attribute value.
+	 * @param string $class_name Class name to add.
+	 * @return string Updated class attribute value.
+	 */
+	function emilias_theme_lqip_append_class( $classes, $class_name ) {
+		$classes = is_string( $classes ) ? trim( $classes ) : '';
+
+		if ( '' !== $classes && false !== strpos( ' ' . $classes . ' ', ' ' . $class_name . ' ' ) ) {
+			return $classes;
+		}
+
+		return trim( $classes . ' ' . $class_name );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_merge_style' ) ) :
+	/**
+	 * Adds the placeholder background styles to an image style attribute.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed  $style    Existing style attribute value.
+	 * @param string $data_uri Placeholder data URI.
+	 * @return string Updated style attribute value.
+	 */
+	function emilias_theme_lqip_merge_style( $style, $data_uri ) {
+		$style = is_string( $style ) ? trim( $style ) : '';
+
+		if ( ! emilias_theme_lqip_data_uri_is_valid( $data_uri ) || false !== stripos( $style, 'background-image' ) ) {
+			return $style;
+		}
+
+		if ( '' !== $style && ';' !== substr( $style, -1 ) ) {
+			$style .= ';';
+		}
+
+		return $style . 'background-image:url("' . $data_uri . '");background-size:cover;background-position:center;background-repeat:no-repeat;';
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_add_to_attributes' ) ) :
+	/**
+	 * Adds LQIP class and style attributes to an image.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param array  $attr     Image attributes.
+	 * @param string $data_uri Placeholder data URI.
+	 * @return array Updated image attributes.
+	 */
+	function emilias_theme_lqip_add_to_attributes( $attr, $data_uri ) {
+		if ( ! emilias_theme_lqip_data_uri_is_valid( $data_uri ) ) {
+			return $attr;
+		}
+
+		$attr['class'] = emilias_theme_lqip_append_class( isset( $attr['class'] ) ? $attr['class'] : '', 'has-lqip' );
+		$attr['style'] = emilias_theme_lqip_merge_style( isset( $attr['style'] ) ? $attr['style'] : '', $data_uri );
+
+		return $attr;
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_add_attachment_image_attributes' ) ) :
+	/**
+	 * Adds LQIP styling to images rendered by wp_get_attachment_image().
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param array   $attr       Image attributes.
+	 * @param WP_Post $attachment Attachment post object.
+	 * @param string  $size       Requested image size.
+	 * @return array Updated image attributes.
+	 */
+	function emilias_theme_lqip_add_attachment_image_attributes( $attr, $attachment, $size ) {
+		unset( $size );
+
+		if ( ! $attachment instanceof WP_Post ) {
+			return $attr;
+		}
+
+		return emilias_theme_lqip_add_to_attributes(
+			$attr,
+			emilias_theme_lqip_attachment_data_uri( $attachment->ID )
+		);
+	}
+endif;
+add_filter( 'wp_get_attachment_image_attributes', 'emilias_theme_lqip_add_attachment_image_attributes', 10, 3 );
+
+if ( ! function_exists( 'emilias_theme_lqip_attachment_id_from_class' ) ) :
+	/**
+	 * Extracts an attachment ID from the wp-image-{id} class.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed $classes Image class attribute value.
+	 * @return int Attachment ID, or 0.
+	 */
+	function emilias_theme_lqip_attachment_id_from_class( $classes ) {
+		if ( ! is_string( $classes ) || '' === $classes ) {
+			return 0;
+		}
+
+		if ( 1 !== preg_match( '/(?:^|\s)wp-image-(\d+)(?:\s|$)/', $classes, $matches ) ) {
+			return 0;
+		}
+
+		return absint( $matches[1] );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_post_id_from_class' ) ) :
+	/**
+	 * Extracts a post ID from the post-{id} class.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed $classes Post class attribute value.
+	 * @return int Post ID, or 0.
+	 */
+	function emilias_theme_lqip_post_id_from_class( $classes ) {
+		if ( ! is_string( $classes ) || '' === $classes ) {
+			return 0;
+		}
+
+		if ( 1 !== preg_match( '/(?:^|\s)post-(\d+)(?:\s|$)/', $classes, $matches ) ) {
+			return 0;
+		}
+
+		return absint( $matches[1] );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_is_masonry_post_template_block' ) ) :
+	/**
+	 * Checks whether a rendered Post Template block is a masonry layout.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param array $block Parsed block.
+	 * @return bool Whether the block is a masonry Post Template.
+	 */
+	function emilias_theme_lqip_is_masonry_post_template_block( $block ) {
+		$class_name = isset( $block['attrs']['className'] ) ? $block['attrs']['className'] : '';
+
+		if ( ! is_string( $class_name ) || '' === $class_name ) {
+			return false;
+		}
+
+		return false !== strpos( ' ' . $class_name . ' ', ' is-style-masonry ' )
+			|| false !== strpos( ' ' . $class_name . ' ', ' is-style-masonry-collage ' );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_merge_thumbnail_color_style' ) ) :
+	/**
+	 * Adds thumbnail color custom properties to a style attribute.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed $style  Existing style attribute.
+	 * @param array $colors Thumbnail colors.
+	 * @return string Updated style attribute.
+	 */
+	function emilias_theme_lqip_merge_thumbnail_color_style( $style, $colors ) {
+		if ( ! emilias_theme_lqip_metadata_has_colors( $colors ) ) {
+			return is_string( $style ) ? $style : '';
+		}
+
+		$style = is_string( $style ) ? trim( $style ) : '';
+
+		if ( '' !== $style && ';' !== substr( $style, -1 ) ) {
+			$style .= ';';
+		}
+
+		if ( false === stripos( $style, '--emilias-thumb-bg' ) ) {
+			$style .= '--emilias-thumb-bg:' . $colors['background_color'] . ';';
+		}
+
+		if ( false === stripos( $style, '--emilias-thumb-fg' ) ) {
+			$style .= '--emilias-thumb-fg:' . $colors['foreground_color'] . ';';
+		}
+
+		return $style;
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_add_thumbnail_colors_to_masonry_posts' ) ) :
+	/**
+	 * Adds generated thumbnail color variables to masonry Post Template items.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $block_content Rendered block content.
+	 * @param array  $block         Parsed block.
+	 * @return string Updated block content.
+	 */
+	function emilias_theme_lqip_add_thumbnail_colors_to_masonry_posts( $block_content, $block ) {
+		if (
+			! class_exists( 'WP_HTML_Tag_Processor' )
+			|| ! emilias_theme_lqip_is_masonry_post_template_block( $block )
+			|| false === strpos( $block_content, 'wp-block-post' )
+		) {
+			return $block_content;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $block_content );
+
+		while ( $processor->next_tag( array( 'class_name' => 'wp-block-post' ) ) ) {
+			$classes = $processor->get_attribute( 'class' );
+			$post_id = emilias_theme_lqip_post_id_from_class( $classes );
+
+			if ( $post_id <= 0 ) {
+				continue;
+			}
+
+			$thumbnail_id = get_post_thumbnail_id( $post_id );
+
+			if ( ! $thumbnail_id ) {
+				continue;
+			}
+
+			$colors = emilias_theme_lqip_attachment_colors( $thumbnail_id );
+
+			if ( ! emilias_theme_lqip_metadata_has_colors( $colors ) ) {
+				continue;
+			}
+
+			$processor->set_attribute(
+				'class',
+				emilias_theme_lqip_append_class( $classes, 'has-thumbnail-color' )
+			);
+			$processor->set_attribute(
+				'style',
+				emilias_theme_lqip_merge_thumbnail_color_style( $processor->get_attribute( 'style' ), $colors )
+			);
+		}
+
+		return $processor->get_updated_html();
+	}
+endif;
+add_filter( 'render_block_core/post-template', 'emilias_theme_lqip_add_thumbnail_colors_to_masonry_posts', 20, 2 );
+
+if ( ! function_exists( 'emilias_theme_lqip_data_uri_for_tag' ) ) :
+	/**
+	 * Finds the right placeholder for a rendered img tag.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param WP_HTML_Tag_Processor $processor HTML tag processor.
+	 * @return string Placeholder data URI, or an empty string.
+	 */
+	function emilias_theme_lqip_data_uri_for_tag( $processor ) {
+		$classes = $processor->get_attribute( 'class' );
+
+		if ( is_string( $classes ) && false !== strpos( ' ' . $classes . ' ', ' has-lqip ' ) ) {
+			return '';
+		}
+
+		$attachment_id = emilias_theme_lqip_attachment_id_from_class( $classes );
+
+		if ( $attachment_id > 0 ) {
+			$data_uri = emilias_theme_lqip_attachment_data_uri( $attachment_id );
+
+			if ( '' !== $data_uri ) {
+				return $data_uri;
+			}
+		}
+
+		$src = $processor->get_attribute( 'src' );
+
+		return is_string( $src ) ? emilias_theme_lqip_theme_asset_data_uri( $src ) : '';
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_add_to_rendered_images' ) ) :
+	/**
+	 * Adds LQIP styling to rendered block image markup.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $block_content Rendered block content.
+	 * @return string Updated block content.
+	 */
+	function emilias_theme_lqip_add_to_rendered_images( $block_content ) {
+		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) || false === stripos( $block_content, '<img' ) ) {
+			return $block_content;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $block_content );
+
+		while ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+			$data_uri = emilias_theme_lqip_data_uri_for_tag( $processor );
+
+			if ( '' === $data_uri ) {
+				continue;
+			}
+
+			$processor->set_attribute(
+				'class',
+				emilias_theme_lqip_append_class( $processor->get_attribute( 'class' ), 'has-lqip' )
+			);
+			$processor->set_attribute(
+				'style',
+				emilias_theme_lqip_merge_style( $processor->get_attribute( 'style' ), $data_uri )
+			);
+		}
+
+		return $processor->get_updated_html();
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_render_block' ) ) :
+	/**
+	 * Adds LQIP placeholders to attachment and bundled theme images in blocks.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $block_content Rendered block content.
+	 * @param array  $block         Parsed block.
+	 * @return string Updated block content.
+	 */
+	function emilias_theme_lqip_render_block( $block_content, $block ) {
+		unset( $block );
+
+		if (
+			false === stripos( $block_content, '<img' )
+			|| (
+				false === strpos( $block_content, 'wp-image-' )
+				&& false === strpos( $block_content, '/assets/images/' )
+			)
+		) {
+			return $block_content;
+		}
+
+		return emilias_theme_lqip_add_to_rendered_images( $block_content );
+	}
+endif;
+add_filter( 'render_block', 'emilias_theme_lqip_render_block', 10, 2 );

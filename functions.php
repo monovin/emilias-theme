@@ -9,6 +9,8 @@
  * @since Emilias theme 1.0
  */
 
+require_once get_parent_theme_file_path( 'inc/lqip.php' );
+
 if ( ! function_exists( 'emilias_theme_post_format_setup' ) ) :
 	/**
 	 * Adds theme support for post formats.
