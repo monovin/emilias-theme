@@ -323,7 +323,7 @@
 		}
 	}
 
-	function observeItems(grid) {
+	function observeItems(grid, shouldSchedule = true) {
 		const state = states.get(grid);
 
 		if (!state?.items) {
@@ -341,7 +341,9 @@
 			});
 		});
 
-		scheduleLayout(grid);
+		if (shouldSchedule) {
+			scheduleLayout(grid);
+		}
 	}
 
 	function initGrid(grid) {
@@ -389,7 +391,8 @@
 			nextState.resizeObserver.observe(grid);
 		}
 
-		observeItems(grid);
+		observeItems(grid, false);
+		layoutGrid(grid);
 	}
 
 	function initMasonry() {
