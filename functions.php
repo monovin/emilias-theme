@@ -22,6 +22,42 @@ if ( ! function_exists( 'emilias_theme_post_format_setup' ) ) :
 	}
 endif;
 
+if ( ! function_exists( 'emilias_theme_image_sizes_setup' ) ) :
+	/**
+	 * Registers theme image sizes for responsive artwork layouts.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @return void
+	 */
+	function emilias_theme_image_sizes_setup() {
+		add_image_size( 'emilias-grid', 1024, 0, false );
+		add_image_size( 'emilias-content', 1700, 0, false );
+		add_image_size( 'emilias-wide', 2560, 0, false );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_image_size_names' ) ) :
+	/**
+	 * Adds theme image sizes to the editor size choices.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param array $sizes Registered image size labels keyed by size name.
+	 * @return array Updated image size labels.
+	 */
+	function emilias_theme_image_size_names( $sizes ) {
+		return array_merge(
+			$sizes,
+			array(
+				'emilias-grid'    => __( 'Emilia grid', 'emilias-theme' ),
+				'emilias-content' => __( 'Emilia content', 'emilias-theme' ),
+				'emilias-wide'    => __( 'Emilia wide', 'emilias-theme' ),
+			)
+		);
+	}
+endif;
+
 if ( ! function_exists( 'emilias_theme_copyright_year' ) ) :
 	/**
 	 * Returns the current year for the copyright shortcode.
@@ -36,6 +72,8 @@ if ( ! function_exists( 'emilias_theme_copyright_year' ) ) :
 endif;
 add_shortcode( 'copyright_year', 'emilias_theme_copyright_year' );
 add_action( 'after_setup_theme', 'emilias_theme_post_format_setup' );
+add_action( 'after_setup_theme', 'emilias_theme_image_sizes_setup' );
+add_filter( 'image_size_names_choose', 'emilias_theme_image_size_names' );
 
 if ( ! function_exists( 'emilias_theme_editor_style' ) ) :
 	/**
@@ -102,7 +140,10 @@ if ( ! function_exists( 'emilias_theme_block_styles' ) ) :
 			get_theme_file_uri( 'assets/js/post-template-masonry.js' ),
 			array(),
 			file_exists( $masonry_script_path ) ? filemtime( $masonry_script_path ) : wp_get_theme()->get( 'Version' ),
-			true
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
 		);
 
 		register_block_style(

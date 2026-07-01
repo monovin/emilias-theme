@@ -18,17 +18,17 @@
       "defaultPalette": false,
       "palette": [
         {
-          "color": "#FFFFFF",
+          "color": "#f1efdf",
           "name": "Base",
           "slug": "base"
         },
         {
-          "color": "#111111",
+          "color": "#4e2c1d",
           "name": "Contrast",
           "slug": "contrast"
         },
         {
-          "color": "#FFEE58",
+          "color": "#d14a22",
           "name": "Accent 1",
           "slug": "accent-1"
         },
