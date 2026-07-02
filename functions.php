@@ -221,6 +221,188 @@ if ( ! function_exists( 'emilias_theme_is_masonry_post_template_class' ) ) :
 	}
 endif;
 
+if ( ! function_exists( 'emilias_theme_query_contains_masonry_post_template' ) ) :
+	/**
+	 * Checks whether a Query block contains a masonry Post Template block.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param array $block Parsed block.
+	 * @return bool Whether the block tree contains a masonry Post Template.
+	 */
+	function emilias_theme_query_contains_masonry_post_template( $block ) {
+		if ( empty( $block['innerBlocks'] ) || ! is_array( $block['innerBlocks'] ) ) {
+			return false;
+		}
+
+		foreach ( $block['innerBlocks'] as $inner_block ) {
+			if ( ! is_array( $inner_block ) ) {
+				continue;
+			}
+
+			if ( 'core/post-template' === ( $inner_block['blockName'] ?? '' ) ) {
+				$class_name = isset( $inner_block['attrs']['className'] ) ? $inner_block['attrs']['className'] : '';
+
+				if ( is_string( $class_name ) && emilias_theme_is_masonry_post_template_class( $class_name ) ) {
+					return true;
+				}
+			}
+
+			if ( emilias_theme_query_contains_masonry_post_template( $inner_block ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_replace_last_closing_tag' ) ) :
+	/**
+	 * Replaces the final closing tag in an HTML fragment.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $html     HTML fragment.
+	 * @param string $old_tag  Existing tag name.
+	 * @param string $new_tag  Replacement tag name.
+	 * @param bool   $replaced Whether a replacement was made.
+	 * @return string Updated HTML fragment.
+	 */
+	function emilias_theme_replace_last_closing_tag( $html, $old_tag, $new_tag, &$replaced ) {
+		$replaced = false;
+
+		if ( ! preg_match_all( '/<\\s*\\/\\s*' . preg_quote( $old_tag, '/' ) . '\\s*>/i', $html, $matches, PREG_OFFSET_CAPTURE ) ) {
+			return $html;
+		}
+
+		$last_match = end( $matches[0] );
+		$replaced   = true;
+
+		return substr_replace( $html, '</' . $new_tag . '>', $last_match[1], strlen( $last_match[0] ) );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_change_query_wrapper_tag' ) ) :
+	/**
+	 * Changes the static wrapper tag saved for a Query block.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param array  $block    Parsed Query block.
+	 * @param string $new_tag  Replacement wrapper tag.
+	 * @return array Updated parsed block.
+	 */
+	function emilias_theme_change_query_wrapper_tag( $block, $new_tag ) {
+		if ( empty( $block['innerContent'] ) || ! is_array( $block['innerContent'] ) ) {
+			return $block;
+		}
+
+		$opening_index = null;
+		$closing_index = null;
+		$opening_html  = '';
+		$closing_html  = '';
+
+		foreach ( $block['innerContent'] as $index => $chunk ) {
+			if ( ! is_string( $chunk ) ) {
+				continue;
+			}
+
+			$updated = preg_replace( '/<\\s*div(\\s[^>]*)?>/i', '<' . $new_tag . '$1>', $chunk, 1, $opening_count );
+
+			if ( $opening_count ) {
+				$opening_index = $index;
+				$opening_html  = $updated;
+				break;
+			}
+		}
+
+		for ( $index = count( $block['innerContent'] ) - 1; $index >= 0; $index-- ) {
+			$chunk = $block['innerContent'][ $index ];
+
+			if ( ! is_string( $chunk ) ) {
+				continue;
+			}
+
+			$updated = emilias_theme_replace_last_closing_tag( $chunk, 'div', $new_tag, $closing_count );
+
+			if ( $closing_count ) {
+				$closing_index = $index;
+				$closing_html  = $updated;
+				break;
+			}
+		}
+
+		if ( null === $opening_index || null === $closing_index ) {
+			return $block;
+		}
+
+		$block['innerContent'][ $opening_index ] = $opening_html;
+		$block['innerContent'][ $closing_index ] = $closing_html;
+
+		if ( ! empty( $block['innerHTML'] ) && is_string( $block['innerHTML'] ) ) {
+			$block['innerHTML'] = preg_replace( '/<\\s*div(\\s[^>]*)?>/i', '<' . $new_tag . '$1>', $block['innerHTML'], 1 );
+			$block['innerHTML'] = emilias_theme_replace_last_closing_tag( $block['innerHTML'], 'div', $new_tag, $ignored );
+		}
+
+		$block['attrs']['tagName'] = $new_tag;
+
+		return $block;
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_parent_block_is_main' ) ) :
+	/**
+	 * Checks whether the direct parent block already renders as a main landmark.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param WP_Block|null $parent_block Parent block instance.
+	 * @return bool Whether the parent block is a main landmark.
+	 */
+	function emilias_theme_parent_block_is_main( $parent_block ) {
+		if ( ! $parent_block instanceof WP_Block ) {
+			return false;
+		}
+
+		$attrs    = isset( $parent_block->parsed_block['attrs'] ) && is_array( $parent_block->parsed_block['attrs'] )
+			? $parent_block->parsed_block['attrs']
+			: array();
+		$tag_name = isset( $attrs['tagName'] ) && is_string( $attrs['tagName'] ) ? strtolower( $attrs['tagName'] ) : '';
+
+		return 'main' === $tag_name;
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_use_main_for_legacy_masonry_query' ) ) :
+	/**
+	 * Makes legacy masonry Query blocks render as the page's main landmark.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param array         $block        Parsed block.
+	 * @param array         $source_block Unmodified parsed block.
+	 * @param WP_Block|null $parent_block Parent block instance.
+	 * @return array Updated parsed block.
+	 */
+	function emilias_theme_use_main_for_legacy_masonry_query( $block, $source_block, $parent_block ) {
+		if ( 'core/query' !== ( $block['blockName'] ?? '' ) ) {
+			return $block;
+		}
+
+		if ( isset( $block['attrs']['tagName'] ) && is_string( $block['attrs']['tagName'] ) && '' !== $block['attrs']['tagName'] ) {
+			return $block;
+		}
+
+		if ( emilias_theme_parent_block_is_main( $parent_block ) || ! emilias_theme_query_contains_masonry_post_template( $block ) ) {
+			return $block;
+		}
+
+		return emilias_theme_change_query_wrapper_tag( $block, 'main' );
+	}
+endif;
+add_filter( 'render_block_data', 'emilias_theme_use_main_for_legacy_masonry_query', 10, 3 );
+
 if ( ! function_exists( 'emilias_theme_sanitize_masonry_css_length' ) ) :
 	/**
 	 * Sanitizes a CSS length for the masonry column-width custom property.
