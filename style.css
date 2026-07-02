@@ -136,36 +136,38 @@ img.has-lqip {
     --emilias-thumb-text-bg-soft: color-mix(in srgb, var(--emilias-thumb-bg) 58%, transparent);
 }
 
-.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) {
-    background-color: var(--emilias-thumb-bg);
-    color: var(--emilias-thumb-text);
-}
+@media (hover: hover) and (pointer: fine) and (min-width: 1025px) {
+    .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) {
+        background-color: var(--emilias-thumb-bg);
+        color: var(--emilias-thumb-text);
+    }
 
-.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) :where(a, [class*="gb-element-"], .gb-text, .wp-block-post-title) {
-    color: var(--emilias-thumb-text);
-}
+    .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) :where(a, [class*="gb-element-"], .gb-text, .wp-block-post-title) {
+        color: var(--emilias-thumb-text);
+    }
 
-.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within)>[class*="gb-element-"] {
-    isolation: isolate;
-    overflow: hidden;
-    position: relative;
-}
+    .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within)>[class*="gb-element-"] {
+        isolation: isolate;
+        overflow: hidden;
+        position: relative;
+    }
 
-.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within)>[class*="gb-element-"]::after {
-    background: linear-gradient(0deg, var(--emilias-thumb-text-bg), var(--emilias-thumb-text-bg-soft) var(--wp--preset--spacing--30), transparent 40%);
-    content: "";
-    inset: 0;
-    pointer-events: none;
-    position: absolute;
-    z-index: 1;
-}
+    .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within)>[class*="gb-element-"]::after {
+        background: linear-gradient(0deg, var(--emilias-thumb-text-bg), var(--emilias-thumb-text-bg-soft) var(--wp--preset--spacing--30), transparent 40%);
+        content: "";
+        inset: 0;
+        pointer-events: none;
+        position: absolute;
+        z-index: 1;
+    }
 
-.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) :where(.gb-text, .wp-block-post-title) {
-    z-index: 2;
-}
+    .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) :where(.gb-text, .wp-block-post-title) {
+        z-index: 2;
+    }
 
-.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) .wp-block-post-featured-image {
-    background-color: var(--emilias-thumb-bg);
+    .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) .wp-block-post-featured-image {
+        background-color: var(--emilias-thumb-bg);
+    }
 }
 
 @supports (color: contrast-color(white)) {

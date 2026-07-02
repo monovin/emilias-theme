@@ -8,7 +8,7 @@
  */
 
 if ( ! defined( 'EMILIAS_THEME_LQIP_METADATA_VERSION' ) ) {
-	define( 'EMILIAS_THEME_LQIP_METADATA_VERSION', 2 );
+	define( 'EMILIAS_THEME_LQIP_METADATA_VERSION', 3 );
 }
 
 if ( ! function_exists( 'emilias_theme_lqip_data_uri_is_valid' ) ) :
@@ -39,6 +39,52 @@ if ( ! function_exists( 'emilias_theme_lqip_metadata_is_current' ) ) :
 		return is_array( $entry )
 			&& isset( $entry['version'] )
 			&& absint( $entry['version'] ) >= EMILIAS_THEME_LQIP_METADATA_VERSION;
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_source_signature' ) ) :
+	/**
+	 * Returns the source file values used to detect stale LQIP metadata.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed  $file      Absolute image path.
+	 * @param string $mime_type Source image MIME type.
+	 * @return array Source signature values.
+	 */
+	function emilias_theme_lqip_source_signature( $file, $mime_type ) {
+		$file_exists = is_string( $file ) && '' !== $file && file_exists( $file );
+
+		return array(
+			'source_filesize'  => $file_exists ? filesize( $file ) : 0,
+			'source_modified'  => $file_exists ? filemtime( $file ) : 0,
+			'source_mime_type' => $mime_type,
+		);
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_lqip_metadata_matches_source' ) ) :
+	/**
+	 * Checks whether stored LQIP metadata matches the current source file.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param mixed  $entry     LQIP metadata entry.
+	 * @param mixed  $file      Absolute image path.
+	 * @param string $mime_type Source image MIME type.
+	 * @return bool Whether the metadata matches the current source.
+	 */
+	function emilias_theme_lqip_metadata_matches_source( $entry, $file, $mime_type ) {
+		if ( ! is_array( $entry ) ) {
+			return false;
+		}
+
+		$signature = emilias_theme_lqip_source_signature( $file, $mime_type );
+
+		return isset( $entry['source_filesize'], $entry['source_modified'], $entry['source_mime_type'] )
+			&& (int) $entry['source_filesize'] === (int) $signature['source_filesize']
+			&& (int) $entry['source_modified'] === (int) $signature['source_modified']
+			&& $entry['source_mime_type'] === $signature['source_mime_type'];
 	}
 endif;
 
@@ -452,10 +498,7 @@ if ( ! function_exists( 'emilias_theme_lqip_create_attachment_metadata_entry' ) 
 		return array_merge(
 			$placeholder,
 			emilias_theme_lqip_create_color_metadata( $file, $mime_type ),
-			array(
-				'source_filesize'  => file_exists( $file ) ? filesize( $file ) : 0,
-				'source_mime_type' => $mime_type,
-			)
+			emilias_theme_lqip_source_signature( $file, $mime_type )
 		);
 	}
 endif;
@@ -509,6 +552,8 @@ if ( ! function_exists( 'emilias_theme_lqip_attachment_metadata_entry' ) ) :
 	 */
 	function emilias_theme_lqip_attachment_metadata_entry( $attachment_id ) {
 		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$file     = get_attached_file( $attachment_id );
+		$mime     = get_post_mime_type( $attachment_id );
 
 		if ( is_array( $metadata ) && ! empty( $metadata['emilias_lqip']['data_uri'] ) ) {
 			$entry = $metadata['emilias_lqip'];
@@ -517,6 +562,7 @@ if ( ! function_exists( 'emilias_theme_lqip_attachment_metadata_entry' ) ) :
 				emilias_theme_lqip_data_uri_is_valid( $entry['data_uri'] )
 				&& emilias_theme_lqip_metadata_has_colors( $entry )
 				&& emilias_theme_lqip_metadata_is_current( $entry )
+				&& emilias_theme_lqip_metadata_matches_source( $entry, $file, $mime )
 			) {
 				return $entry;
 			}
@@ -605,17 +651,15 @@ if ( ! function_exists( 'emilias_theme_lqip_generate_missing_attachment_metadata
 			empty( $entry['data_uri'] )
 			|| ! emilias_theme_lqip_data_uri_is_valid( $entry['data_uri'] )
 			|| ! emilias_theme_lqip_metadata_is_current( $entry )
+			|| ! emilias_theme_lqip_metadata_matches_source( $entry, $file, $mime_type )
 		) {
 			$entry = emilias_theme_lqip_create_attachment_metadata_entry( $file, $mime_type );
 		} elseif ( ! emilias_theme_lqip_metadata_has_colors( $entry ) ) {
 			$entry = array_merge(
 				$entry,
 				emilias_theme_lqip_create_color_metadata( $file, $mime_type ),
-				array(
-					'source_filesize'  => file_exists( $file ) ? filesize( $file ) : 0,
-					'source_mime_type' => $mime_type,
-					'version'          => EMILIAS_THEME_LQIP_METADATA_VERSION,
-				)
+				emilias_theme_lqip_source_signature( $file, $mime_type ),
+				array( 'version' => EMILIAS_THEME_LQIP_METADATA_VERSION )
 			);
 		}
 
