@@ -131,18 +131,12 @@ img.has-lqip {
 }
 
 .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color {
-    --emilias-thumb-text: var(--emilias-thumb-fg);
-    --emilias-thumb-text-bg: color-mix(in srgb, var(--emilias-thumb-bg) 88%, transparent);
-    --emilias-thumb-text-bg-soft: color-mix(in srgb, var(--emilias-thumb-bg) 58%, transparent);
+    --emilias-thumb-text-bg: color-mix(in oklab, var(--emilias-thumb-bg) 80%, black);
 }
 
 @media (hover: hover) and (pointer: fine) and (min-width: 1025px) {
     .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) {
         background-color: var(--emilias-thumb-bg);
-        color: var(--emilias-thumb-text);
-    }
-
-    .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) :where(a, [class*="gb-element-"], .gb-text, .wp-block-post-title) {
         color: var(--emilias-thumb-text);
     }
 
@@ -153,7 +147,7 @@ img.has-lqip {
     }
 
     .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within)>[class*="gb-element-"]::after {
-        background: linear-gradient(0deg, var(--emilias-thumb-text-bg), var(--emilias-thumb-text-bg-soft) var(--wp--preset--spacing--30), transparent 40%);
+        background: linear-gradient(0deg, var(--emilias-thumb-text-bg) 10%, transparent 50%);
         content: "";
         inset: 0;
         pointer-events: none;
@@ -167,12 +161,6 @@ img.has-lqip {
 
     .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color:is(:hover, :focus-within) .wp-block-post-featured-image {
         background-color: var(--emilias-thumb-bg);
-    }
-}
-
-@supports (color: contrast-color(white)) {
-    .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)>li.wp-block-post.has-thumbnail-color {
-        --emilias-thumb-text: contrast-color(var(--emilias-thumb-bg));
     }
 }
 

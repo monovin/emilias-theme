@@ -1,4 +1,4 @@
 interface:
-  display_name: "Project PHP"
-  short_description: "Use Local.app PHP for theme linting"
-  default_prompt: "Use $project-php to lint the WordPress theme PHP files."
+  display_name: "Emilias Theme Project"
+  short_description: "Use local PHP and CSS build conventions"
+  default_prompt: "Use $project-php for this theme's PHP linting and stylesheet build conventions."

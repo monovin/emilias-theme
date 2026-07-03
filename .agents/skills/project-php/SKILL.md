@@ -1,6 +1,6 @@
 ---
 name: project-php
-description: Use for this WordPress theme project whenever Codex needs PHP CLI access, PHP syntax linting, or WordPress theme PHP validation. Provides the Local.app bundled PHP binary path for this machine and preferred commands for linting project PHP files.
+description: Use for this WordPress theme project whenever Codex needs project-specific PHP CLI access, PHP syntax linting, WordPress theme PHP validation, or stylesheet build conventions. Provides the Local.app bundled PHP binary path, preferred commands for linting project PHP files, and the style.css to style.min.css build relationship.
 ---
 
 # Project PHP
@@ -43,3 +43,26 @@ git ls-files '*.php' | xargs -I {} "$HOME/Library/Application Support/Local/ligh
 ```
 
 If `git ls-files` omits new PHP files, include those files explicitly.
+
+## Stylesheet Build Output
+
+Treat `style.css` as the source stylesheet. Treat `style.min.css` as generated output from `style.css`; do not manually edit both files for the same CSS change.
+
+After changing `style.css`, regenerate `style.min.css` from the theme root with:
+
+```bash
+npm run build:css
+```
+
+Use the full build when token or LQIP outputs should also be refreshed:
+
+```bash
+npm run build
+```
+
+The relevant npm scripts are:
+
+```json
+"build": "npm run tokens:generate && npm run lqip:generate && npm run build:css",
+"build:css": "postcss style.css --use cssnano -o style.min.css --no-map"
+```
