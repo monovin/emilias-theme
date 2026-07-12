@@ -403,6 +403,179 @@ if ( ! function_exists( 'emilias_theme_use_main_for_legacy_masonry_query' ) ) :
 endif;
 add_filter( 'render_block_data', 'emilias_theme_use_main_for_legacy_masonry_query', 10, 3 );
 
+if ( ! function_exists( 'emilias_theme_trim_excerpt_preserving_newlines' ) ) :
+	/**
+	 * Trims excerpt text while keeping manual line breaks intact.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $text      Excerpt text.
+	 * @param int    $num_words Number of words.
+	 * @return string Trimmed excerpt text.
+	 */
+	function emilias_theme_trim_excerpt_preserving_newlines( $text, $num_words ) {
+		$more          = __( '&hellip;' );
+		$original_text = $text;
+		$text          = wp_strip_all_tags( $text );
+		$num_words     = (int) $num_words;
+
+		if ( $num_words < 1 ) {
+			return wp_trim_words( $original_text, $num_words, $more );
+		}
+
+		if ( 0 === strpos( wp_get_word_count_type(), 'characters' ) && preg_match( '/^utf\-?8$/i', get_option( 'blog_charset' ) ) ) {
+			$text       = preg_replace( "/[\t ]+/", ' ', $text );
+			$characters = preg_split( '//u', $text, -1, PREG_SPLIT_NO_EMPTY );
+			$output     = '';
+			$count      = 0;
+
+			if ( ! is_array( $characters ) ) {
+				return wp_trim_words( $original_text, $num_words, $more );
+			}
+
+			foreach ( $characters as $character ) {
+				++$count;
+
+				if ( $count > $num_words ) {
+					$output = rtrim( $output ) . $more;
+					break;
+				}
+
+				$output .= $character;
+			}
+
+			$text = trim( $output );
+		} else {
+			$parts   = preg_split( "/([\n\r\t ]+)/", $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+			$output  = '';
+			$count   = 0;
+			$trimmed = false;
+
+			if ( ! is_array( $parts ) ) {
+				return wp_trim_words( $original_text, $num_words, $more );
+			}
+
+			foreach ( $parts as $part ) {
+				if ( preg_match( "/^[\n\r\t ]+$/", $part ) ) {
+					if ( '' !== $output ) {
+						$output .= $part;
+					}
+
+					continue;
+				}
+
+				++$count;
+
+				if ( $count > $num_words ) {
+					$trimmed = true;
+					break;
+				}
+
+				$output .= $part;
+			}
+
+			$text = trim( $output );
+			$text = preg_replace( "/[ \t]*([\r\n]+)[ \t]*/", '$1', $text );
+			$text = preg_replace( '/[ \t]+/', ' ', $text );
+
+			if ( $trimmed ) {
+				$text = rtrim( $text ) . $more;
+			}
+		}
+
+		return apply_filters( 'wp_trim_words', $text, $num_words, $more, $original_text );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_manual_excerpt_more_link' ) ) :
+	/**
+	 * Builds the inline "read more" link for the Post Excerpt block.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param array $attributes Post Excerpt block attributes.
+	 * @param int   $post_id    Post ID.
+	 * @return string Link HTML, or an empty string.
+	 */
+	function emilias_theme_manual_excerpt_more_link( $attributes, $post_id ) {
+		if ( empty( $attributes['moreText'] ) ) {
+			return '';
+		}
+
+		return '<a class="wp-block-post-excerpt__more-link" href="' . esc_url( get_the_permalink( $post_id ) ) . '">'
+			. wp_kses_post( $attributes['moreText'] )
+			. '</a>';
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_preserve_manual_excerpt_newlines' ) ) :
+	/**
+	 * Makes the Post Excerpt block respect line breaks in manual excerpts.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string        $block_content Rendered block content.
+	 * @param array         $block         Parsed block.
+	 * @param WP_Block|null $instance      Block instance.
+	 * @return string Updated block content.
+	 */
+	function emilias_theme_preserve_manual_excerpt_newlines( $block_content, $block, $instance = null ) {
+		$post_id = 0;
+
+		if ( $instance instanceof WP_Block && ! empty( $instance->context['postId'] ) ) {
+			$post_id = (int) $instance->context['postId'];
+		} elseif ( ! empty( $block['context']['postId'] ) ) {
+			$post_id = (int) $block['context']['postId'];
+		} else {
+			$post_id = (int) get_the_ID();
+		}
+
+		if ( $post_id <= 0 ) {
+			return $block_content;
+		}
+
+		$post = get_post( $post_id );
+
+		if ( ! $post instanceof WP_Post || '' === trim( (string) $post->post_excerpt ) ) {
+			return $block_content;
+		}
+
+		$excerpt = get_the_excerpt( $post );
+
+		if ( ! preg_match( '/[\r\n]/', $excerpt ) ) {
+			return $block_content;
+		}
+
+		$attributes     = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+		$excerpt_length = isset( $attributes['excerptLength'] ) ? (int) $attributes['excerptLength'] : 55;
+		$excerpt        = emilias_theme_trim_excerpt_preserving_newlines( $excerpt, $excerpt_length );
+		$excerpt        = wp_kses_post( nl2br( $excerpt, false ) );
+
+		if ( '' === $excerpt ) {
+			return $block_content;
+		}
+
+		$show_more_on_new_line = ! isset( $attributes['showMoreOnNewLine'] ) || $attributes['showMoreOnNewLine'];
+		$more_link             = $show_more_on_new_line ? '' : emilias_theme_manual_excerpt_more_link( $attributes, $post_id );
+
+		if ( '' !== $more_link ) {
+			$excerpt .= ' ' . $more_link;
+		}
+
+		$updated_content = preg_replace_callback(
+			'/(<p\b[^>]*class=(["\'])(?=[^"\']*\bwp-block-post-excerpt__excerpt\b)[^"\']*\2[^>]*>).*?(<\/p>)/is',
+			static function ( $matches ) use ( $excerpt ) {
+				return $matches[1] . $excerpt . $matches[3];
+			},
+			$block_content,
+			1
+		);
+
+		return is_string( $updated_content ) ? $updated_content : $block_content;
+	}
+endif;
+add_filter( 'render_block_core/post-excerpt', 'emilias_theme_preserve_manual_excerpt_newlines', 10, 3 );
+
 if ( ! function_exists( 'emilias_theme_sanitize_masonry_css_length' ) ) :
 	/**
 	 * Sanitizes a CSS length for the masonry column-width custom property.
