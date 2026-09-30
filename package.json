@@ -18,19 +18,21 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.0",
-		"@sugarcube-sh/cli": "0.1.16",
+		"@sugarcube-sh/cli": "0.1.20",
 		"@wordpress/browserslist-config": "^6.34.0",
 		"cssnano": "^7.1.2",
 		"postcss": "^8.5.6",
 		"postcss-cli": "^11.0.1",
-		"sharp": "^0.35.3"
+		"sharp": "^0.35.3",
+		"terser": "^5.36.0"
 	},
 	"browserslist": [
 		"extends @wordpress/browserslist-config"
 	],
 	"scripts": {
-		"build": "npm run tokens:generate && npm run lqip:generate && npm run build:css",
+		"build": "npm run tokens:generate && npm run lqip:generate && npm run build:css && npm run build:js",
 		"build:css": "postcss style.css --use cssnano -o style.min.css --no-map",
+		"build:js": "node scripts/minify-js.mjs assets/js/post-template-masonry.js assets/js/post-template-masonry.min.js",
 		"check": "biome lint .",
 		"check:write": "biome check --write .",
 		"format": "biome format --write .",

@@ -128,7 +128,9 @@ if ( ! function_exists( 'emilias_theme_block_styles' ) ) :
 	 */
 	function emilias_theme_block_styles() {
 		$masonry_style_path  = get_theme_file_path( 'assets/css/post-template-masonry.css' );
-		$masonry_script_path = get_theme_file_path( 'assets/js/post-template-masonry.js' );
+		$js_suffix           = SCRIPT_DEBUG ? '' : '.min';
+		$masonry_script_name = 'post-template-masonry' . $js_suffix . '.js';
+		$masonry_script_path = get_theme_file_path( 'assets/js/' . $masonry_script_name );
 
 		wp_register_style(
 			'emilias-theme-post-template-masonry',
@@ -139,7 +141,7 @@ if ( ! function_exists( 'emilias_theme_block_styles' ) ) :
 
 		wp_register_script(
 			'emilias-theme-post-template-masonry',
-			get_theme_file_uri( 'assets/js/post-template-masonry.js' ),
+			get_theme_file_uri( 'assets/js/' . $masonry_script_name ),
 			array(),
 			file_exists( $masonry_script_path ) ? filemtime( $masonry_script_path ) : wp_get_theme()->get( 'Version' ),
 			array(
