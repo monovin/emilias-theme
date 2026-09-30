@@ -33,9 +33,11 @@ if ( ! function_exists( 'emilias_theme_image_sizes_setup' ) ) :
 	 * @return void
 	 */
 	function emilias_theme_image_sizes_setup() {
+		add_image_size( 'emilias-thumb', 860, 0, false );
 		add_image_size( 'emilias-grid', 1024, 0, false );
 		add_image_size( 'emilias-content', 1700, 0, false );
-		add_image_size( 'emilias-wide', 2560, 0, false );
+		add_image_size( 'emilias-hero', 1920, 0, false );
+		add_image_size( 'emilias-wide', 2680, 0, false );
 	}
 endif;
 
@@ -52,8 +54,10 @@ if ( ! function_exists( 'emilias_theme_image_size_names' ) ) :
 		return array_merge(
 			$sizes,
 			array(
+				'emilias-thumb'   => __( 'Emilia thumb', 'emilias-theme' ),
 				'emilias-grid'    => __( 'Emilia grid', 'emilias-theme' ),
 				'emilias-content' => __( 'Emilia content', 'emilias-theme' ),
+				'emilias-hero'    => __( 'Emilia hero', 'emilias-theme' ),
 				'emilias-wide'    => __( 'Emilia wide', 'emilias-theme' ),
 			)
 		);
