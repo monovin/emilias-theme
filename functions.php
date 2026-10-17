@@ -765,3 +765,43 @@ if ( ! function_exists( 'emilias_theme_format_binding' ) ) :
 		}
 	}
 endif;
+
+if ( ! function_exists( 'emilias_theme_preload_webfonts' ) ) :
+	/**
+	 * Preloads primary web fonts in the document head for faster first paint.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @return void
+	 */
+	function emilias_theme_preload_webfonts() {
+		$fonts = array(
+			'assets/fonts/bricolage-grotesque/bricolage-grotesque-400-normal.woff2',
+			'assets/fonts/ibm-plex-sans/ibm-plex-sans-400-normal.woff2',
+		);
+
+		foreach ( $fonts as $font ) {
+			$font_uri = get_theme_file_uri( $font );
+			echo '<link rel="preload" href="' . esc_url( $font_uri ) . '" as="font" type="font/woff2" crossorigin>' . "\n";
+		}
+	}
+endif;
+add_action( 'wp_head', 'emilias_theme_preload_webfonts', 2 );
+
+if ( ! function_exists( 'emilias_theme_omit_loading_attr_threshold' ) ) :
+	/**
+	 * Increases the threshold of images that omit loading="lazy" for the 3-column masonry grid.
+	 *
+	 * Ensures all above-the-fold cards (the first 6 items) download eagerly without lazy load delay.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int $threshold The default number of images to omit loading="lazy" on.
+	 * @return int Adjusted threshold.
+	 */
+	function emilias_theme_omit_loading_attr_threshold( $threshold ) {
+		return max( 6, $threshold );
+	}
+endif;
+add_filter( 'wp_omit_loading_attr_threshold', 'emilias_theme_omit_loading_attr_threshold' );
+

@@ -164,6 +164,11 @@ img.has-lqip {
     }
 }
 
+.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage) :where(.gb-text, .wp-block-post-title) > a {
+    display: inline-block;
+    padding-block: 2px;
+}
+
 /*
 Reference
 https://piccalil.li/blog/why-im-excited-about-text-box-trim-as-a-designer/

@@ -19,6 +19,13 @@
 	min-width: 0;
 }
 
+.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)
+	:where(.gb-text, .wp-block-post-title)
+	> a {
+	display: inline-block;
+	padding-block: 2px;
+}
+
 .wp-block-post-template.is-style-masonry-collage > li.wp-block-post {
 	--masonry-column-span: 1;
 }
