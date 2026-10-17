@@ -369,24 +369,24 @@ if ( ! function_exists( 'emilias_theme_masonry_card_sizes' ) ) :
 	 * measures the card while it is still full width and picks a far larger candidate
 	 * than the card renders at. Stating the card width outright removes that dependency.
 	 *
-	 * The grid packs columns of at least 20rem inside the content width, so it settles on
-	 * two columns and a card of roughly half the content size. The exact value is
-	 * overridable for layouts that differ.
+	 * The grid is repeat(auto-fill, minmax(max(min(20rem, 100%), quarter), 1fr)) inside
+	 * the wide size, which gives three bands rather than a single card width:
+	 *
+	 *   360-720px   one column,  card 320-676px
+	 *   760-1080px  two columns, card 335-492px
+	 *   1120px and up, three columns, card 324-411px
+	 *
+	 * The values below track that. 50vw covers the two column band within about 10% and
+	 * never falls short of the real card, and the fixed 411px is the widest a card gets
+	 * in the three column band. They were measured against this grid CSS, so revisit them
+	 * if the column width, gap, content size or wide size changes.
 	 *
 	 * @since Emilias theme 1.0
 	 *
 	 * @return string A sizes attribute value.
 	 */
 	function emilias_theme_masonry_card_sizes() {
-		$content_width = (int) wp_get_global_settings( array( 'layout', 'contentSize' ) );
-
-		if ( $content_width <= 0 ) {
-			$content_width = 845;
-		}
-
-		$card_width  = (int) round( $content_width / 2 );
-		$breakpoint  = (int) round( $content_width * 0.85 );
-		$sizes_value = sprintf( '(max-width: %1$dpx) 100vw, %2$dpx', $breakpoint, $card_width );
+		$sizes_value = '(max-width: 719px) 100vw, (max-width: 1119px) 50vw, 411px';
 
 		/**
 		 * Filters the sizes attribute used for the leading masonry grid card.
@@ -396,10 +396,9 @@ if ( ! function_exists( 'emilias_theme_masonry_card_sizes' ) ) :
 		 *
 		 * @since Emilias theme 1.0
 		 *
-		 * @param string $sizes_value  The sizes attribute value.
-		 * @param int    $content_width The content width the value was derived from.
+		 * @param string $sizes_value The sizes attribute value.
 		 */
-		return (string) apply_filters( 'emilias_theme_masonry_card_sizes', $sizes_value, $content_width );
+		return (string) apply_filters( 'emilias_theme_masonry_card_sizes', $sizes_value );
 	}
 endif;
 
