@@ -123,7 +123,8 @@
               "fontWeight": "200 800",
               "src": [
                 "file:./assets/fonts/manrope/Manrope-VariableFont_wght.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             }
           ],
           "fontFamily": "Manrope, sans-serif",
@@ -138,7 +139,8 @@
               "fontWeight": "300 700",
               "src": [
                 "file:./assets/fonts/fira-code/FiraCode-VariableFont_wght.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             }
           ],
           "fontFamily": "\"Fira Code\", monospace",
@@ -153,7 +155,8 @@
               "fontWeight": "200",
               "src": [
                 "file:./assets/fonts/bricolage-grotesque/bricolage-grotesque-200-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"Bricolage Grotesque\"",
@@ -161,7 +164,8 @@
               "fontWeight": "300",
               "src": [
                 "file:./assets/fonts/bricolage-grotesque/bricolage-grotesque-300-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"Bricolage Grotesque\"",
@@ -169,7 +173,8 @@
               "fontWeight": "400",
               "src": [
                 "file:./assets/fonts/bricolage-grotesque/bricolage-grotesque-400-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"Bricolage Grotesque\"",
@@ -177,7 +182,8 @@
               "fontWeight": "500",
               "src": [
                 "file:./assets/fonts/bricolage-grotesque/bricolage-grotesque-500-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"Bricolage Grotesque\"",
@@ -185,7 +191,8 @@
               "fontWeight": "600",
               "src": [
                 "file:./assets/fonts/bricolage-grotesque/bricolage-grotesque-600-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"Bricolage Grotesque\"",
@@ -193,7 +200,8 @@
               "fontWeight": "700",
               "src": [
                 "file:./assets/fonts/bricolage-grotesque/bricolage-grotesque-700-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"Bricolage Grotesque\"",
@@ -201,7 +209,8 @@
               "fontWeight": "800",
               "src": [
                 "file:./assets/fonts/bricolage-grotesque/bricolage-grotesque-800-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             }
           ],
           "fontFamily": "\"Bricolage Grotesque\", sans-serif",
@@ -216,7 +225,8 @@
               "fontWeight": "100",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-100-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -224,7 +234,8 @@
               "fontWeight": "200",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-200-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -232,7 +243,8 @@
               "fontWeight": "300",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-300-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -240,7 +252,8 @@
               "fontWeight": "400",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-400-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -248,7 +261,8 @@
               "fontWeight": "500",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-500-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -256,7 +270,8 @@
               "fontWeight": "600",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-600-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -264,7 +279,8 @@
               "fontWeight": "700",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-700-normal.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -272,7 +288,8 @@
               "fontWeight": "100",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-100-italic.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -280,7 +297,8 @@
               "fontWeight": "200",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-200-italic.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -288,7 +306,8 @@
               "fontWeight": "300",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-300-italic.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -296,7 +315,8 @@
               "fontWeight": "400",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-400-italic.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -304,7 +324,8 @@
               "fontWeight": "500",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-500-italic.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -312,7 +333,8 @@
               "fontWeight": "600",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-600-italic.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             },
             {
               "fontFamily": "\"IBM Plex Sans\"",
@@ -320,7 +342,8 @@
               "fontWeight": "700",
               "src": [
                 "file:./assets/fonts/ibm-plex-sans/ibm-plex-sans-700-italic.woff2"
-              ]
+              ],
+              "fontDisplay": "swap"
             }
           ],
           "fontFamily": "\"IBM Plex Sans\", sans-serif",
