@@ -65,6 +65,173 @@ if ( ! function_exists( 'emilias_theme_image_dimensions' ) ) :
 	}
 endif;
 
+if ( ! function_exists( 'emilias_theme_max_content_image_width' ) ) :
+	/**
+	 * Returns the widest image a content image is allowed to fall back to.
+	 *
+	 * Used when repairing an image whose source cannot be resolved against its
+	 * attachment metadata and which therefore carries no srcset at all.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @return int Maximum width in pixels.
+	 */
+	function emilias_theme_max_content_image_width() {
+		/**
+		 * Filters the maximum width used when rebuilding an unresolvable content image.
+		 *
+		 * @since Emilias theme 1.0
+		 *
+		 * @param int $width Maximum width in pixels.
+		 */
+		return (int) apply_filters( 'emilias_theme_max_content_image_width', 1700 );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_attachment_image_candidates' ) ) :
+	/**
+	 * Collects the generated sizes of an attachment as srcset candidates.
+	 *
+	 * Sizes are resolved through wp_get_attachment_image_src() so that URL construction
+	 * runs through the same filters as a normal WordPress image. Any candidate that
+	 * resolves back to the unscaled original is discarded, so an unresolvable source
+	 * is never rebuilt into the very file it was meant to avoid.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return array Candidate URLs keyed by width.
+	 */
+	function emilias_theme_attachment_image_candidates( $attachment_id ) {
+		$attachment_id = absint( $attachment_id );
+
+		if ( ! $attachment_id ) {
+			return array();
+		}
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		if ( empty( $metadata['sizes'] ) || ! is_array( $metadata['sizes'] ) ) {
+			return array();
+		}
+
+		$original_url = wp_get_attachment_url( $attachment_id );
+		$original     = $original_url ? wp_basename( $original_url ) : '';
+		$candidates   = array();
+
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			$image = wp_get_attachment_image_src( $attachment_id, $size_name );
+
+			if ( ! $image || empty( $image[0] ) || empty( $image[1] ) || empty( $image[2] ) ) {
+				continue;
+			}
+
+			// Never point back at the original, which is what this repair exists to avoid.
+			if ( '' !== $original && wp_basename( $image[0] ) === $original ) {
+				continue;
+			}
+
+			$candidates[ (int) $image[1] ] = $image;
+		}
+
+		ksort( $candidates );
+
+		return $candidates;
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_repair_unresolvable_image' ) ) :
+	/**
+	 * Rebuilds a content image that WordPress could not resolve against its metadata.
+	 *
+	 * When a stored source does not match the attachment's registered file or any of
+	 * its generated sizes, wp_image_add_srcset_and_sizes() gives up: the image is emitted
+	 * with no srcset, no sizes and no dimensions, and whatever URL it points at is
+	 * downloaded at full size. A block that has drifted onto the unscaled original is
+	 * therefore served as a bare multi-megabyte image.
+	 *
+	 * This only runs when core has already failed to produce a srcset. An image with any
+	 * srcset is left exactly as WordPress resolved it.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param WP_HTML_Tag_Processor $processor     Processor positioned on the image.
+	 * @param int                   $attachment_id Attachment ID taken from the class list.
+	 * @return bool Whether the image was rebuilt.
+	 */
+	function emilias_theme_repair_unresolvable_image( $processor, $attachment_id ) {
+		if ( null !== $processor->get_attribute( 'srcset' ) || ! $attachment_id ) {
+			return false;
+		}
+
+		$src = $processor->get_attribute( 'src' );
+		$src = is_string( $src ) ? $src : '';
+
+		if ( '' === $src ) {
+			return false;
+		}
+
+		list( $src ) = explode( '?', $src );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		// Core resolves this successfully whenever the metadata is intact, so bail early.
+		if ( ! is_array( $metadata ) || wp_image_src_get_dimensions( $src, $metadata, $attachment_id ) ) {
+			return false;
+		}
+
+		$candidates = emilias_theme_attachment_image_candidates( $attachment_id );
+
+		if ( ! $candidates ) {
+			return false;
+		}
+
+		$max_width = emilias_theme_max_content_image_width();
+		$srcset    = array();
+
+		foreach ( $candidates as $width => $image ) {
+			$srcset[] = $image[0] . ' ' . $width . 'w';
+		}
+
+		/*
+		 * Prefer the widest candidate that still fits the allowed maximum, so the
+		 * default src never exceeds it. Otherwise take the narrowest candidate that
+		 * still covers the maximum, so the image is not upscaled on large displays.
+		 */
+		$chosen = null;
+
+		foreach ( $candidates as $width => $image ) {
+			if ( $width <= $max_width ) {
+				$chosen = $image;
+			}
+		}
+
+		if ( null === $chosen ) {
+			$chosen = reset( $candidates );
+		}
+
+		$processor->set_attribute( 'src', $chosen[0] );
+		$processor->set_attribute( 'srcset', implode( ', ', $srcset ) );
+
+		if ( null === $processor->get_attribute( 'sizes' ) ) {
+			$sizes = wp_calculate_image_sizes( array( (int) $chosen[1], (int) $chosen[2] ), $chosen[0], $metadata, $attachment_id );
+
+			if ( $sizes ) {
+				$processor->set_attribute( 'sizes', $sizes );
+			}
+		}
+
+		if ( null === $processor->get_attribute( 'width' ) ) {
+			$processor->set_attribute( 'width', (string) (int) $chosen[1] );
+		}
+
+		if ( null === $processor->get_attribute( 'height' ) ) {
+			$processor->set_attribute( 'height', (string) (int) $chosen[2] );
+		}
+
+		return true;
+	}
+endif;
+
 if ( ! function_exists( 'emilias_theme_improve_first_image' ) ) :
 	/**
 	 * Loads the first image eagerly and adds intrinsic dimensions to every image.
@@ -116,6 +283,8 @@ if ( ! function_exists( 'emilias_theme_improve_first_image' ) ) :
 			}
 
 			$attachment_id = emilias_theme_attachment_id_from_img_class( $processor->get_attribute( 'class' ) );
+
+			emilias_theme_repair_unresolvable_image( $processor, $attachment_id );
 
 			$dimensions = emilias_theme_image_dimensions( $src, $attachment_id );
 
