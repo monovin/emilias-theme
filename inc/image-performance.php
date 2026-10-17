@@ -359,6 +359,86 @@ if ( ! function_exists( 'emilias_theme_improve_excerpt_images' ) ) :
 endif;
 add_filter( 'get_the_excerpt', 'emilias_theme_improve_excerpt_images', 20 );
 
+if ( ! function_exists( 'emilias_theme_masonry_card_sizes' ) ) :
+	/**
+	 * Builds a sizes attribute for a masonry grid card.
+	 *
+	 * The masonry grid is positioned by JavaScript: cards are laid out full width by CSS
+	 * until the script measures the grid and writes a column width per card. An image
+	 * that loads eagerly cannot wait for that, so a browser relying on sizes="auto"
+	 * measures the card while it is still full width and picks a far larger candidate
+	 * than the card renders at. Stating the card width outright removes that dependency.
+	 *
+	 * The grid packs columns of at least 20rem inside the content width, so it settles on
+	 * two columns and a card of roughly half the content size. The exact value is
+	 * overridable for layouts that differ.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @return string A sizes attribute value.
+	 */
+	function emilias_theme_masonry_card_sizes() {
+		$content_width = (int) wp_get_global_settings( array( 'layout', 'contentSize' ) );
+
+		if ( $content_width <= 0 ) {
+			$content_width = 845;
+		}
+
+		$card_width  = (int) round( $content_width / 2 );
+		$breakpoint  = (int) round( $content_width * 0.85 );
+		$sizes_value = sprintf( '(max-width: %1$dpx) 100vw, %2$dpx', $breakpoint, $card_width );
+
+		/**
+		 * Filters the sizes attribute used for the leading masonry grid card.
+		 *
+		 * Only applied to the leading card, which is the one image that loads eagerly
+		 * and therefore cannot benefit from layout measurement.
+		 *
+		 * @since Emilias theme 1.0
+		 *
+		 * @param string $sizes_value  The sizes attribute value.
+		 * @param int    $content_width The content width the value was derived from.
+		 */
+		return (string) apply_filters( 'emilias_theme_masonry_card_sizes', $sizes_value, $content_width );
+	}
+endif;
+
+if ( ! function_exists( 'emilias_theme_set_leading_masonry_card_sizes' ) ) :
+	/**
+	 * States the card width on the leading masonry image.
+	 *
+	 * Replaces the sizes attribute of the first image in a masonry Post Template. Later
+	 * images keep sizes="auto", which measures accurately because they are lazy loaded
+	 * and so resolve after the masonry script has positioned the grid.
+	 *
+	 * @since Emilias theme 1.0
+	 *
+	 * @param string $block_content The rendered block content.
+	 * @return string The rendered block content.
+	 */
+	function emilias_theme_set_leading_masonry_card_sizes( $block_content ) {
+		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			return $block_content;
+		}
+
+		$sizes = emilias_theme_masonry_card_sizes();
+
+		if ( '' === $sizes ) {
+			return $block_content;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $block_content );
+
+		if ( ! $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+			return $block_content;
+		}
+
+		$processor->set_attribute( 'sizes', $sizes );
+
+		return $processor->get_updated_html();
+	}
+endif;
+
 if ( ! function_exists( 'emilias_theme_eager_masonry_leading_image' ) ) :
 	/**
 	 * Loads the leading masonry thumbnail eagerly.
@@ -367,6 +447,10 @@ if ( ! function_exists( 'emilias_theme_eager_masonry_leading_image' ) ) :
 	 * images towards the `wp_omit_loading_attr_threshold()` budget and marks every
 	 * thumbnail `loading="lazy"`, including the one that opens the grid and becomes the
 	 * largest contentful paint.
+	 *
+	 * Because that leading image loads eagerly, it also has to be told how wide its card
+	 * will be. The masonry script has not positioned the grid at the point the browser
+	 * resolves an eagerly loaded image, so it cannot measure the card itself.
 	 *
 	 * @since Emilias theme 1.0
 	 *
@@ -381,7 +465,9 @@ if ( ! function_exists( 'emilias_theme_eager_masonry_leading_image' ) ) :
 			return $block_content;
 		}
 
-		return emilias_theme_improve_first_image( $block_content );
+		$block_content = emilias_theme_improve_first_image( $block_content );
+
+		return emilias_theme_set_leading_masonry_card_sizes( $block_content );
 	}
 endif;
 add_filter( 'render_block_core/post-template', 'emilias_theme_eager_masonry_leading_image', 20, 2 );
