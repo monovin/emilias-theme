@@ -10,6 +10,7 @@
  */
 
 require_once get_parent_theme_file_path( 'inc/lqip.php' );
+require_once get_parent_theme_file_path( 'inc/image-performance.php' );
 
 if ( ! function_exists( 'emilias_theme_post_format_setup' ) ) :
 	/**
@@ -790,9 +791,12 @@ add_action( 'wp_head', 'emilias_theme_preload_webfonts', 2 );
 
 if ( ! function_exists( 'emilias_theme_omit_loading_attr_threshold' ) ) :
 	/**
-	 * Increases the threshold of images that omit loading="lazy" for the 3-column masonry grid.
+	 * Increases the number of content images that omit loading="lazy".
 	 *
-	 * Ensures all above-the-fold cards (the first 6 items) download eagerly without lazy load delay.
+	 * Only reaches images rendered inside the main query loop, such as single posts
+	 * and archives. A masonry Post Template runs as a secondary query, so WordPress
+	 * never counts its thumbnails towards this budget and lazy-loads every one of
+	 * them. That grid is handled by emilias_theme_eager_masonry_leading_image().
 	 *
 	 * @since Emilias theme 1.0
 	 *
