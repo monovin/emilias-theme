@@ -771,6 +771,10 @@ if ( ! function_exists( 'emilias_theme_preload_webfonts' ) ) :
 	/**
 	 * Preloads primary web fonts in the document head for faster first paint.
 	 *
+	 * The italic IBM Plex Sans face is included because it sets body copy, and it is
+	 * the face the font-display audit waits on. It ships subset, so preloading it costs
+	 * roughly 19 KB rather than the 80 KB the full character set weighed.
+	 *
 	 * @since Emilias theme 1.0
 	 *
 	 * @return void
@@ -779,6 +783,7 @@ if ( ! function_exists( 'emilias_theme_preload_webfonts' ) ) :
 		$fonts = array(
 			'assets/fonts/bricolage-grotesque/bricolage-grotesque-400-normal.woff2',
 			'assets/fonts/ibm-plex-sans/ibm-plex-sans-400-normal.woff2',
+			'assets/fonts/ibm-plex-sans/ibm-plex-sans-400-italic.woff2',
 		);
 
 		foreach ( $fonts as $font ) {
