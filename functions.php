@@ -792,9 +792,9 @@ if ( ! function_exists( 'emilias_theme_preload_webfonts' ) ) :
 	 */
 	function emilias_theme_preload_webfonts() {
 		$fonts = array(
-			'assets/fonts/bricolage-grotesque/bricolage-grotesque-400-normal.woff2',
-			'assets/fonts/ibm-plex-sans/ibm-plex-sans-400-normal.woff2',
-			'assets/fonts/ibm-plex-sans/ibm-plex-sans-400-italic.woff2',
+			'assets/fonts/bricolage-grotesque/bricolage-grotesque-400-normal-subset.woff2',
+			'assets/fonts/ibm-plex-sans/ibm-plex-sans-400-normal-subset.woff2',
+			'assets/fonts/ibm-plex-sans/ibm-plex-sans-400-italic-subset.woff2',
 		);
 
 		foreach ( $fonts as $font ) {

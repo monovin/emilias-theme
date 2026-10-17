@@ -13,6 +13,11 @@ retaining their weight axis adds risk for no measured gain.
 
 The unsubsetted originals stay in git history, so this is safe to revert.
 
+Only the IBM Plex Sans and Bricolage Grotesque files carry a -subset suffix. That
+suffix is load-bearing: the fonts are served with a ten year max-age, so a
+subset written over an existing filename would never reach browsers that had
+already fetched the original.
+
 Usage:
     python3 scripts/subset-fonts.py            # subset in place
     python3 scripts/subset-fonts.py --check    # report without writing
