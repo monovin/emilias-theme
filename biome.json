@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": true,
-		"includes": ["**", "!style.min.css", "!package-lock.json"]
+		"includes": ["**", "!style.min.css", "!package-lock.json", "!**/*.min.js"]
 	},
 	"formatter": {
 		"enabled": true,

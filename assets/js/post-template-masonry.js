@@ -384,7 +384,6 @@
 
 		grids.add(grid);
 		states.set(grid, nextState);
-		grid.classList.add("is-js-masonry");
 
 		if ("ResizeObserver" in window) {
 			nextState.resizeObserver = new ResizeObserver(() => scheduleLayout(grid));
@@ -393,6 +392,7 @@
 
 		observeItems(grid, false);
 		layoutGrid(grid);
+		grid.classList.add("is-js-masonry");
 	}
 
 	function initMasonry() {
@@ -460,10 +460,9 @@
 		});
 	}
 
+	initMasonry();
 	if (document.readyState === "loading") {
 		document.addEventListener("DOMContentLoaded", initMasonry);
-	} else {
-		initMasonry();
 	}
 
 	window.addEventListener("resize", scheduleAll);

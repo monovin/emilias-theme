@@ -150,7 +150,6 @@ if ( ! function_exists( 'emilias_theme_block_styles' ) ) :
 			file_exists( $masonry_script_path ) ? filemtime( $masonry_script_path ) : wp_get_theme()->get( 'Version' ),
 			array(
 				'in_footer' => true,
-				'strategy'  => 'defer',
 			)
 		);
 

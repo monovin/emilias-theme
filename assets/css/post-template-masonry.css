@@ -2,6 +2,16 @@
 	align-items: start;
 }
 
+.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage):not(.is-js-masonry):not(.is-native-masonry) {
+	visibility: hidden;
+}
+
+@media (scripting: none) {
+	.wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage):not(.is-js-masonry):not(.is-native-masonry) {
+		visibility: visible;
+	}
+}
+
 .wp-block-post-template:is(.is-style-masonry, .is-style-masonry-collage)
 	> li.wp-block-post {
 	box-sizing: border-box;
