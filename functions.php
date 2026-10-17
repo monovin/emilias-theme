@@ -29,11 +29,17 @@ if ( ! function_exists( 'emilias_theme_image_sizes_setup' ) ) :
 	/**
 	 * Registers theme image sizes for responsive artwork layouts.
 	 *
+	 * The emilias-card size fills the gap between the 150px thumbnail and
+	 * emilias-thumb. Without it the smallest candidate above a full-width mobile card
+	 * is 860px, which a 378px wide slot at a 2x device pixel ratio does not need, so
+	 * every grid card on a phone downloads roughly a fifth more pixels than it renders.
+	 *
 	 * @since Emilias theme 1.0
 	 *
 	 * @return void
 	 */
 	function emilias_theme_image_sizes_setup() {
+		add_image_size( 'emilias-card', 768, 0, false );
 		add_image_size( 'emilias-thumb', 860, 0, false );
 		add_image_size( 'emilias-grid', 1024, 0, false );
 		add_image_size( 'emilias-content', 1700, 0, false );
@@ -55,6 +61,7 @@ if ( ! function_exists( 'emilias_theme_image_size_names' ) ) :
 		return array_merge(
 			$sizes,
 			array(
+				'emilias-card'    => __( 'Emilia card', 'emilias-theme' ),
 				'emilias-thumb'   => __( 'Emilia thumb', 'emilias-theme' ),
 				'emilias-grid'    => __( 'Emilia grid', 'emilias-theme' ),
 				'emilias-content' => __( 'Emilia content', 'emilias-theme' ),
