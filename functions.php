@@ -789,23 +789,14 @@ if ( ! function_exists( 'emilias_theme_preload_webfonts' ) ) :
 endif;
 add_action( 'wp_head', 'emilias_theme_preload_webfonts', 2 );
 
-if ( ! function_exists( 'emilias_theme_omit_loading_attr_threshold' ) ) :
-	/**
-	 * Increases the number of content images that omit loading="lazy".
-	 *
-	 * Only reaches images rendered inside the main query loop, such as single posts
-	 * and archives. A masonry Post Template runs as a secondary query, so WordPress
-	 * never counts its thumbnails towards this budget and lazy-loads every one of
-	 * them. That grid is handled by emilias_theme_eager_masonry_leading_image().
-	 *
-	 * @since Emilias theme 1.0
-	 *
-	 * @param int $threshold The default number of images to omit loading="lazy" on.
-	 * @return int Adjusted threshold.
-	 */
-	function emilias_theme_omit_loading_attr_threshold( $threshold ) {
-		return max( 6, $threshold );
-	}
-endif;
-add_filter( 'wp_omit_loading_attr_threshold', 'emilias_theme_omit_loading_attr_threshold' );
+/*
+ * The loading="lazy" threshold is left at the WordPress default of three.
+ *
+ * A previous version raised it to six on the assumption that a masonry Post
+ * Template renders six above-the-fold cards. A masonry grid actually runs as a
+ * secondary query, so this filter never reached it; the six eager images were
+ * all landing on single posts, where only the hero is above the fold on a
+ * narrow viewport. The leading masonry thumbnail is handled separately by
+ * emilias_theme_eager_masonry_leading_image().
+ */
 
